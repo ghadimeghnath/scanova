@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ARExperience {
+  id        String   @id @default(cuid()) // Changed from MongoDB ObjectId to cuid()
+  shortCode String   @unique // The 6-character code for the QR link
+  
+  message   String   // "Happy Anniversary!"
+  imageUrl  String   // The Uploadthing URL for their custom photo
+  
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
