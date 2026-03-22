@@ -1,3 +1,4 @@
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,13 +7,40 @@ datasource db {
   provider = "postgresql"
 }
 
+// ── Keychain AR experiences ───────────────────────────────────────────────────
+// Flow:
+//   1. Admin pre-generates codes (claimed=false, no imageUrl/message yet)
+//   2. User scans QR → lands on /keychain/[code]
+//   3. If claimed=false → show setup form → user uploads photo + message
+//   4. On submit → claimed=true, imageUrl+message saved
+//   5. Future scans → go straight to AR (no re-upload)
 model ARExperience {
-  id        String   @id @default(cuid()) // Changed from MongoDB ObjectId to cuid()
-  shortCode String   @unique // The 6-character code for the QR link
-  
-  message   String   // "Happy Anniversary!"
-  imageUrl  String   // The Uploadthing URL for their custom photo
-  
+  id        String   @id @default(cuid())
+  code      String   @unique               // printed on keychain QR
+  message   String   @default("")          // set by user on first scan
+  imageUrl  String   @default("")          // set by user on first scan
+  type      String   @default("keychain")
+  claimed   Boolean  @default(false)       // false = blank QR, true = activated
   isActive  Boolean  @default(true)
+  scanCount Int      @default(0)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+}
+
+// ── Sticker AR experiences ────────────────────────────────────────────────────
+// Admin creates these directly with all data pre-set.
+model StickerExperience {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  targetImage String                        // .mind file URL
+  assetUrl    String   @default("")         // .glb URL (optional)
+  message     String   @default("")
+  isActive    Boolean  @default(true)
+  scanCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([code])
 }

@@ -1,3 +1,5 @@
+// This is the root layout for the entire application. It sets up the HTML structure and includes global styles.
+
 import "./globals.css";
 
 export const metadata = {
