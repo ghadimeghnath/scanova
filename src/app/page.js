@@ -94,12 +94,6 @@ export default function LandingPage() {
           >
             How It Works
           </a>
-          <Link
-            href='/create'
-            className="py-[8px] px-[20px] rounded-full font-['Space_Mono','Courier_New',monospace] text-[10px] tracking-[0.15em] uppercase no-underline bg-[#00E5FF] text-black font-bold transition-all duration-200 hover:shadow-[0_0_30px_rgba(0,229,255,0.4)]"
-          >
-            Create ✦
-          </Link>
         </div>
       </nav>
 
