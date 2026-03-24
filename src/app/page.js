@@ -139,10 +139,10 @@ export default function LandingPage() {
                 ✦ &nbsp;Shop Drop 001
               </a>
               <Link
-                href='/create'
+                href='/keychain'
                 className="inline-flex items-center gap-[10px] py-[18px] px-[44px] bg-transparent border border-[#F2F0EB]/[0.18] text-[#F2F0EB] font-['Space_Mono','Courier_New',monospace] text-[11px] tracking-[0.15em] uppercase no-underline rounded-full transition-all duration-250 hover:border-[#F2F0EB]/[0.4] hover:bg-[#F2F0EB]/[0.04]"
               >
-                Create Custom →
+                Activate Keychain →
               </Link>
             </div>
           </>

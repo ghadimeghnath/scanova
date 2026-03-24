@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import StatusOverlay from "./keychain-ar/StatusOverlay";
+import DebugTerminal from "./keychain-ar/DebugTerminal";
+import DebugToggle from "./keychain-ar/DebugToggle";
 
 const createLogger = (setLogs) => (msg, type = "info") => {
   const icons = { info: "▸", success: "✅", warn: "⚠️", error: "❌" };
@@ -474,60 +477,14 @@ export default function WebXRScene({ message, imageUrl }) {
       {/* DOM Overlay */}
       <div id="ar-overlay" style={{ position: "fixed", inset: 0, zIndex: 10000, pointerEvents: "none" }}>
 
-        {/* Debug terminal (hidden by default) */}
-        {showLogs && (
-          <div ref={logRef} style={{
-            position: "absolute", top: 12, left: 12, right: 60,
-            maxHeight: "38vh", overflowY: "auto",
-            background: "rgba(0,0,0,0.92)", border: "1px solid #00FF88",
-            borderRadius: 10, padding: "10px 12px",
-            fontFamily: "monospace", fontSize: 11,
-            color: "#00FF88", whiteSpace: "pre-wrap", wordBreak: "break-all",
-            pointerEvents: "none",
-          }}>
-            <div style={{ color: "#fff", marginBottom: 6, fontWeight: "bold" }}>📟 Debug</div>
-            {logs.map((l, i) => (
-              <div key={i} style={{
-                color: l.includes("❌") ? "#ff6b6b" : l.includes("⚠️") ? "#ffd93d" : l.includes("✅") ? "#00FF88" : "#888",
-                lineHeight: 1.5,
-              }}>{l}</div>
-            ))}
-          </div>
-        )}
+        {/* Debug terminal */}
+        {showLogs && <DebugTerminal logs={logs} logRef={logRef} />}
 
-        {/* Debug toggle (tiny, top-right) */}
-        <div style={{ position: "absolute", top: 14, right: 14, zIndex: 10002, pointerEvents: "auto" }}>
-          <button onClick={() => setShowLogs(v => !v)} style={{
-            background: "rgba(0,0,0,0.6)", color: "#666",
-            border: "1px solid #333", borderRadius: 6,
-            padding: "4px 8px", fontSize: 10,
-            fontFamily: "monospace", cursor: "pointer",
-          }}>
-            {showLogs ? "✕" : "dbg"}
-          </button>
-        </div>
+        {/* Debug toggle */}
+        <DebugToggle showLogs={showLogs} setShowLogs={setShowLogs} />
 
         {/* Status area */}
-        <div style={{
-          position: "absolute", bottom: 130, left: "50%",
-          transform: "translateX(-50%)", whiteSpace: "nowrap",
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-        }}>
-          {status === "loading" && <ScanLine />}
-          {status === "unsupported" && <Chip color="#ff6b6b">❌ AR not supported on this device</Chip>}
-          {status === "error" && <Chip color="#ff6b6b">❌ Failed — tap debug for details</Chip>}
-          {status === "ready" && (
-            <>
-              <Chip pulse accent>✦ &nbsp;Tap ENTER AR below</Chip>
-            </>
-          )}
-          {status === "ar-active" && !placed && (
-            <ScanPrompt />
-          )}
-          {status === "ar-active" && placed && (
-            <Chip color="#00FF88" dark>✦ &nbsp;Tap to place again</Chip>
-          )}
-        </div>
+        <StatusOverlay status={status} placed={placed} />
       </div>
 
       {/* Three.js canvas */}
@@ -538,94 +495,6 @@ export default function WebXRScene({ message, imageUrl }) {
         @keyframes scan-move { 0%{transform:translateY(0)} 100%{transform:translateY(60px)} }
         @keyframes chip-in { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
       `}</style>
-    </div>
-  );
-}
-
-// ── Sub-components ─────────────────────────────────────────────────────────
-
-function Chip({ children, color = "#fff", dark = false, pulse = false, accent = false }) {
-  return (
-    <div style={{
-      background: dark
-        ? color
-        : accent
-          ? "linear-gradient(135deg,rgba(0,229,255,0.15),rgba(0,114,255,0.1))"
-          : "rgba(0,0,0,0.82)",
-      backdropFilter: "blur(16px)",
-      color: dark ? "#000" : color,
-      padding: "13px 28px",
-      borderRadius: 999,
-      border: accent ? "1px solid rgba(0,229,255,0.5)" : `1px solid ${color}44`,
-      fontSize: 13,
-      fontFamily: "'Georgia', serif",
-      fontWeight: 700,
-      letterSpacing: "0.06em",
-      textAlign: "center",
-      animation: pulse ? "pulse-opacity 2s infinite" : "none",
-      boxShadow: accent
-        ? "0 0 24px rgba(0,229,255,0.2), inset 0 1px 0 rgba(255,255,255,0.1)"
-        : `0 0 20px ${color}22`,
-    }}>
-      {children}
-    </div>
-  );
-}
-
-function ScanPrompt() {
-  return (
-    <div style={{
-      background: "rgba(0,0,0,0.82)",
-      backdropFilter: "blur(16px)",
-      border: "1px solid rgba(0,229,255,0.4)",
-      borderRadius: 16,
-      padding: "14px 24px",
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
-      boxShadow: "0 0 30px rgba(0,229,255,0.15)",
-    }}>
-      {/* Animated scan icon */}
-      <div style={{ position: "relative", width: 28, height: 28, flexShrink: 0 }}>
-        <div style={{
-          position: "absolute", inset: 0,
-          border: "2px solid #00e5ff",
-          borderRadius: 4,
-        }} />
-        <div style={{
-          position: "absolute", left: 0, right: 0, height: 2,
-          background: "linear-gradient(90deg,transparent,#00e5ff,transparent)",
-          top: "40%",
-          animation: "scan-move 1.2s ease-in-out infinite alternate",
-        }} />
-      </div>
-      <div>
-        <div style={{ color: "#fff", fontSize: 13, fontFamily: "'Georgia',serif", fontWeight: 700, letterSpacing: "0.05em" }}>
-          Scanning surface…
-        </div>
-        <div style={{ color: "rgba(0,229,255,0.7)", fontSize: 11, fontFamily: "monospace", marginTop: 2 }}>
-          Point at floor · Tap cyan ring to place
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ScanLine() {
-  return (
-    <div style={{
-      background: "rgba(0,0,0,0.75)",
-      backdropFilter: "blur(12px)",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 999,
-      padding: "12px 26px",
-      color: "rgba(255,255,255,0.6)",
-      fontSize: 12,
-      fontFamily: "monospace",
-      letterSpacing: "0.1em",
-      animation: "pulse-opacity 1.5s infinite",
-    }}>
-      INITIALIZING SPATIAL ENGINE…
     </div>
   );
 }
