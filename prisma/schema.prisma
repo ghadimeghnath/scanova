@@ -20,7 +20,14 @@ model ARExperience {
   message   String   @default("")          // set by user on first scan
   imageUrl  String   @default("")          // set by user on first scan
   type      String   @default("keychain")
-  claimed   Boolean  @default(false)       // false = blank QR, true = activated
+  claimed   Boolean  @default(false)   
+  
+  // ── NEW: physical keychain design theme ──────────────────────────────────
+  // Maps to the index of the target image inside /public/master-themes.mind
+  // Values: "love" | "celebration" | "memory" | "achievement" | "custom"
+  theme     String   @default("love")
+  
+      // false = blank QR, true = activated
   isActive  Boolean  @default(true)
   scanCount Int      @default(0)
   createdAt DateTime @default(now())

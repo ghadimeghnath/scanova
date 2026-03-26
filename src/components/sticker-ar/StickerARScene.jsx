@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import AROverlay from "./sticker-ar/AROverlay";
-import CameraPermissionScreen from "./sticker-ar/CameraPermissionScreen";
+import AROverlay from "./AROverlay";
+import CameraPermissionScreen from "../CameraPermissionScreen";
 import { buildMindARDocument } from "@/hooks/useMindARDocument";
 
 export default function StickerARScene({ targetImage, assetUrl, message, code }) {

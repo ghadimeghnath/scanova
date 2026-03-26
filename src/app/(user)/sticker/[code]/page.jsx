@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import StickerWrapper from "@/components/StickerWrapper";
+import StickerWrapper from "@/components/sticker-ar/StickerWrapper";
 
 export async function generateMetadata({ params }) {
   const { code } = await params;

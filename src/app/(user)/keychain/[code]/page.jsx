@@ -1,8 +1,11 @@
 // app/keychain/[code]/page.jsx
+// Server component — fetches the AR experience from DB, then hands off to:
+//   • KeychainARScene  (claimed — show AR)
+//   • KeychainSetupPage (unclaimed — show activation wizard)
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import WebXRWrapper from "@/components/WebXRWrapper";
 import KeychainSetupPage from "@/components/keychain-ar/KeychainSetupPage";
+import KeychainWrapper from "@/components/keychain-ar/KeychainWrapper";
 
 export async function generateMetadata({ params }) {
   const { code } = await params;
@@ -19,20 +22,20 @@ export default async function KeychainViewerPage({ params }) {
     where: { code },
   });
 
-  // Invalid or deactivated code
   if (!experience || !experience.isActive) notFound();
 
-  // ── CLAIMED → show AR directly ────────────────────────────────────────────
+  // ── Claimed → show AR ───────────────────────────────────────────────────
   if (experience.claimed) {
     return (
-      <WebXRWrapper
-        message={experience.message}
+      <KeychainWrapper
         imageUrl={experience.imageUrl}
-        shortCode={experience.code}
+        message={experience.message}
+        theme={experience.theme}
+        code={experience.code}
       />
     );
   }
 
-  // ── UNCLAIMED → show one-time setup form ──────────────────────────────────
+  // ── Unclaimed → show one-time setup wizard ──────────────────────────────
   return <KeychainSetupPage code={experience.code} />;
 }
