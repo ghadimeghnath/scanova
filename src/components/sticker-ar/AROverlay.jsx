@@ -4,17 +4,18 @@
 // ── Status chip ───────────────────────────────────────────────────────────────
 function Chip({ text, pulse = false, accent = false, green = false, red = false }) {
   const base =
-    "px-6 py-3 rounded-full border font-mono text-xs tracking-widest backdrop-blur-md transition-all";
+    "px-6 py-3 rounded-2xl border-4 border-black dark:border-white font-heading text-sm md:text-base tracking-wide uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] transition-all";
+  
   const variant = green
-    ? "bg-green-400/10 border-green-400/40 text-green-400 shadow-[0_0_20px_rgba(0,255,136,0.3)]"
+    ? "bg-green-400 text-black"
     : red
-    ? "bg-red-500/10 border-red-500/30 text-red-400 shadow-[0_0_20px_rgba(255,80,80,0.2)]"
+    ? "bg-sc-pink text-black"
     : accent
-    ? "bg-cyan-400/10 border-cyan-400/40 text-cyan-400 shadow-[0_0_20px_rgba(0,229,255,0.3)]"
-    : "bg-black/80 border-white/10 text-white/60";
+    ? "bg-sc-cyan text-black"
+    : "bg-white text-black dark:bg-zinc-900 dark:text-white";
 
   return (
-    <div className={`${base} ${variant} ${pulse ? "animate-pulse" : ""}`}>
+    <div className={`${base} ${variant} ${pulse ? "animate-pulse" : "animate-funky"}`}>
       {text}
     </div>
   );
@@ -23,19 +24,19 @@ function Chip({ text, pulse = false, accent = false, green = false, red = false 
 // ── Compile progress bar ──────────────────────────────────────────────────────
 function CompileProgress({ progress }) {
   return (
-    <div className="absolute inset-x-6 top-20 flex flex-col gap-2">
-      <div className="flex justify-between font-mono text-[10px] tracking-widest text-cyan-400/70 uppercase">
-        <span>Compiling target image…</span>
+    <div className="absolute inset-x-6 top-20 flex flex-col gap-3 sc-card max-w-sm mx-auto animate-funky">
+      <div className="flex justify-between font-heading text-sm tracking-wide text-foreground uppercase">
+        <span>Compiling Target...</span>
         <span>{progress}%</span>
       </div>
-      <div className="h-[2px] bg-white/10 rounded-full overflow-hidden">
+      <div className="h-6 bg-gray-100 dark:bg-zinc-800 border-4 border-black dark:border-white rounded-full overflow-hidden shadow-[inset_2px_2px_0px_rgba(0,0,0,0.2)]">
         <div
-          className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-300"
+          className="h-full bg-sc-pink border-r-4 border-black dark:border-white transition-all duration-300"
           style={{ width: `${progress}%` }}
         />
       </div>
-      <p className="mt-2 font-mono text-[11px] text-white/30 text-center leading-relaxed">
-        Analysing image features — first scan takes ~5–15 seconds.
+      <p className="mt-1 font-sans font-bold text-xs text-foreground/70 text-center leading-relaxed">
+        Analysing image features — first scan takes ~5–15 seconds. Hang tight!
       </p>
     </div>
   );
@@ -45,10 +46,10 @@ function CompileProgress({ progress }) {
 function ScanCorners() {
   return (
     <>
-      <div className="absolute top-[60px] left-5  w-7 h-7 border-t-2 border-l-2 border-cyan-400 opacity-70 animate-pulse" />
-      <div className="absolute top-[60px] right-5 w-7 h-7 border-t-2 border-r-2 border-cyan-400 opacity-70 animate-pulse" />
-      <div className="absolute bottom-[140px] left-5  w-7 h-7 border-b-2 border-l-2 border-cyan-400 opacity-70 animate-pulse" />
-      <div className="absolute bottom-[140px] right-5 w-7 h-7 border-b-2 border-r-2 border-cyan-400 opacity-70 animate-pulse" />
+      <div className="absolute top-[80px] left-6  w-12 h-12 border-t-8 border-l-8 border-sc-yellow rounded-tl-2xl opacity-90 animate-pulse drop-shadow-[4px_4px_0_rgba(0,0,0,1)]" />
+      <div className="absolute top-[80px] right-6 w-12 h-12 border-t-8 border-r-8 border-sc-yellow rounded-tr-2xl opacity-90 animate-pulse drop-shadow-[4px_4px_0_rgba(0,0,0,1)]" />
+      <div className="absolute bottom-[160px] left-6  w-12 h-12 border-b-8 border-l-8 border-sc-yellow rounded-bl-2xl opacity-90 animate-pulse drop-shadow-[4px_4px_0_rgba(0,0,0,1)]" />
+      <div className="absolute bottom-[160px] right-6 w-12 h-12 border-b-8 border-r-8 border-sc-yellow rounded-br-2xl opacity-90 animate-pulse drop-shadow-[4px_4px_0_rgba(0,0,0,1)]" />
     </>
   );
 }
@@ -56,29 +57,37 @@ function ScanCorners() {
 // ── Found border flash ────────────────────────────────────────────────────────
 function FoundFlash() {
   return (
-    <div className="absolute inset-0 border-2 border-green-400/40 animate-pulse pointer-events-none" />
+    <div className="ar-funky-frame border-green-400 opacity-80 animate-ping transition-colors duration-300" />
   );
 }
 
 // ── Start button (required to unlock camera on iOS) ───────────────────────────
 function StartButton({ onStart }) {
   return (
-    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black gap-6">
-      {/* Logo */}
-      <div className="font-serif text-3xl tracking-[0.3em] text-white/80 uppercase">
-        SCANOVA
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background px-6">
+      <div className="sc-blob w-24 h-24 bg-sc-pink border-4 border-black flex items-center justify-center text-5xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] animate-funky mb-6">
+        ✨
       </div>
-      <p className="font-mono text-xs tracking-widest text-white/40 text-center px-10 leading-relaxed">
-        Point at your sticker to reveal the 3D art
-      </p>
-      <button
-        onClick={onStart}
-        className="mt-2 px-10 py-4 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full text-black font-bold text-base tracking-widest font-serif border-none cursor-pointer shadow-[0_0_40px_rgba(0,229,255,0.4)]"
-      >
-        ✦ TAP TO START AR
-      </button>
-      <p className="font-mono text-[10px] text-white/20 tracking-widest">
-        Camera access required
+      
+      <div className="sc-card flex flex-col items-center text-center max-w-sm w-full">
+        <div className="sc-slogan mb-2 text-sc-cyan">scanova unchained</div>
+        <h1 className="text-4xl text-foreground mb-4 drop-shadow-[4px_4px_0_var(--color-sc-purple)] uppercase">
+          Ready?
+        </h1>
+        <p className="font-sans font-bold text-base text-foreground/80 leading-relaxed mb-6">
+          Point your camera at your sticker to reveal the 3D art!
+        </p>
+        
+        <button
+          onClick={onStart}
+          className="w-full py-4 bg-sc-yellow text-black font-heading text-xl tracking-wide rounded-xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sc-btn-push"
+        >
+          START AR 🚀
+        </button>
+      </div>
+      
+      <p className="font-handwritten text-base text-foreground/60 font-bold mt-4">
+        * Camera access required
       </p>
     </div>
   );
@@ -98,8 +107,8 @@ export default function AROverlay({ phase, compileProgress, errorDetail, onStart
 
       {/* Brand wordmark */}
       {phase !== "idle" && (
-        <div className="absolute top-5 left-5 font-serif text-lg tracking-[0.25em] text-white/50 uppercase select-none">
-          SCANOVA
+        <div className="absolute top-6 left-6 font-heading text-2xl tracking-widest text-white drop-shadow-[4px_4px_0_var(--color-sc-purple-dark)] uppercase select-none">
+          Scanova
         </div>
       )}
 
@@ -114,12 +123,12 @@ export default function AROverlay({ phase, compileProgress, errorDetail, onStart
 
       {/* Status chip */}
       {phase !== "idle" && (
-        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          {phase === "loading"   && <Chip text="LOADING AR ENGINE…"           pulse />}
-          {phase === "compiling" && <Chip text="COMPILING TARGET…"            pulse accent />}
-          {phase === "tracking"  && <Chip text="POINT CAMERA AT YOUR STICKER" accent />}
-          {phase === "found"     && <Chip text="✦  STICKER RECOGNISED"        green />}
-          {phase === "error"     && <Chip text={`❌  ${errorDetail || "AR failed — check console"}`} red />}
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap">
+          {phase === "loading"   && <Chip text="LOADING AR ENGINE…"          pulse />}
+          {phase === "compiling" && <Chip text="COMPILING TARGET…"           pulse accent />}
+          {phase === "tracking"  && <Chip text="POINT CAMERA AT STICKER"     accent />}
+          {phase === "found"     && <Chip text="✦ STICKER RECOGNISED!"       green />}
+          {phase === "error"     && <Chip text={`❌ ${errorDetail || "AR failed"}`} red />}
         </div>
       )}
     </div>
