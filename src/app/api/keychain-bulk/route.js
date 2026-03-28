@@ -1,48 +1,55 @@
-// app/api/keychain-bulk/route.js
-// Admin generates N empty keychain codes for a given theme in one shot.
-
+// src/app/api/keychain-bulk/route.js
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { generateShortCode } from "@/lib/utils";
+import crypto from "crypto";
 
-const VALID_THEMES = ["love", "celebration", "memory", "achievement", "custom"];
 
-function isAuthorized(request) {
-  const key      = request.headers.get("x-api-key");
-  const expected = process.env.ADMIN_API_KEY;
-  if (!expected) return false;
-  return key === expected;
+export function generateShortCode(prefix = "k") {
+  const raw = crypto.randomBytes(3).toString("hex"); // 6 chars
+  return prefix ? `${prefix}-${raw}` : raw;
 }
 
 export async function POST(request) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
-
   try {
-    const body  = await request.json();
-    const count = Math.min(Math.max(parseInt(body.count) || 1, 1), 200);
-    const theme = VALID_THEMES.includes(body.theme) ? body.theme : "love";
+    const { count = 10, theme = "love" } = await request.json();
 
-    // Generate N unique codes
-    const codes = Array.from({ length: count }, () => generateShortCode("k"));
+    const n = Math.min(Math.max(1, parseInt(count)), 100);
+    if (isNaN(n)) return NextResponse.json({ error: "Invalid count" }, { status: 400 });
 
-    // Bulk insert — all unclaimed, carry the selected theme
+    // Generate unique codes — fetch existing to avoid collisions
+    const existingCodes = new Set(
+      (await prisma.aRExperience.findMany({ select: { code: true } })).map((e) => e.code)
+    );
+
+    const newCodes = [];
+    let attempts = 0;
+    while (newCodes.length < n && attempts < n * 10) {
+      const code = generateShortCode();
+      if (!existingCodes.has(code) && !newCodes.includes(code)) {
+        newCodes.push(code);
+      }
+      attempts++;
+    }
+
+    if (newCodes.length < n) {
+      return NextResponse.json({ error: "Could not generate enough unique codes. Try again." }, { status: 500 });
+    }
+
+    // Bulk insert
     await prisma.aRExperience.createMany({
-      data: codes.map((code) => ({
+      data: newCodes.map((code) => ({
         code,
-        message : "",
+        theme,
+        claimed: false,
+        isActive: true,
+        message: "",
         imageUrl: "",
-        claimed : false,
-        type    : "keychain",
-        theme,          // ← new field
       })),
-      skipDuplicates: true,
     });
 
-    return NextResponse.json({ success: true, codes, theme }, { status: 201 });
+    return NextResponse.json({ success: true, codes: newCodes, count: newCodes.length }, { status: 201 });
   } catch (error) {
     console.error("[POST /api/keychain-bulk]", error);
-    return NextResponse.json({ error: "Server error." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to generate codes" }, { status: 500 });
   }
 }

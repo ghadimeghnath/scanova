@@ -1,111 +1,39 @@
 // src/app/api/sticker-experience/route.js
-
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { generateShortCode } from "@/lib/utils";
 
-// Authorization check
-function isAuthorized(request) {
-  const apiKey = request.headers.get("x-api-key");
-  const expectedKey = process.env.ADMIN_API_KEY;
-
-  if (!expectedKey) {
-    console.error("[sticker-experience] ADMIN_API_KEY not configured");
-    return false;
-  }
-
-  if (!apiKey || apiKey !== expectedKey) {
-    return false;
-  }
-
-  return true;
-}
-
-// Input validation
-function validateInput(targetImage, assetUrl, message) {
-  const errors = [];
-
-  if (!targetImage?.trim()) {
-    errors.push("targetImage (image URL) is required");
-  } else {
-    try {
-      new URL(targetImage.trim());
-    } catch {
-      errors.push("targetImage must be a valid URL");
-    }
-  }
-
-  if (assetUrl?.trim()) {
-    try {
-      new URL(assetUrl.trim());
-    } catch {
-      errors.push("assetUrl must be a valid URL");
-    }
-  }
-
-  if (message && message.length > 200) {
-    errors.push("message must be less than 200 characters");
-  }
-
-  return errors;
-}
-
-export async function POST(request) {
-  // Authorization check
-  if (!isAuthorized(request)) {
-    return NextResponse.json(
-      { error: "Unauthorized. Invalid or missing API key." },
-      { status: 401 }
-    );
-  }
-
+// GET /api/sticker-experience — admin list all
+export async function GET(request) {
   try {
-    const body = await request.json();
-    const { targetImage, assetUrl, message } = body;
+    const experiences = await prisma.stickerExperience.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json({ experiences });
+  } catch (error) {
+    console.error("[GET /api/sticker-experience]", error);
+    return NextResponse.json({ error: "Failed to fetch sticker experiences" }, { status: 500 });
+  }
+}
 
-    // Validate input
-    const errors = validateInput(targetImage, assetUrl, message);
-    if (errors.length > 0) {
-      return NextResponse.json({ error: errors.join("; ") }, { status: 400 });
-    }
+// POST /api/sticker-experience — admin create
+export async function POST(request) {
+  try {
+    const { code, targetImage, assetUrl = "", message = "" } = await request.json();
 
-    // Generate unique code with "s-" prefix
-    const code = generateShortCode("s");
+    if (!code?.trim()) return NextResponse.json({ error: "Code is required" }, { status: 400 });
+    if (!targetImage?.trim()) return NextResponse.json({ error: "Target image URL is required" }, { status: 400 });
 
-    // Save to database
+    const existing = await prisma.stickerExperience.findUnique({ where: { code: code.trim() } });
+    if (existing) return NextResponse.json({ error: "Code already exists" }, { status: 409 });
+
     const experience = await prisma.stickerExperience.create({
-      data: {
-        code,
-        targetImage: targetImage.trim(),
-        assetUrl: assetUrl?.trim() || "",
-        message: message?.trim() ?? "",
-      },
+      data: { code: code.trim(), targetImage: targetImage.trim(), assetUrl, message },
     });
 
-    console.log(`[sticker-experience] Created: ${code}`);
-
-    return NextResponse.json(
-      {
-        success: true,
-        code: experience.code,
-        message: "Sticker experience created successfully",
-      },
-      { status: 201 }
-    );
+    return NextResponse.json({ success: true, experience }, { status: 201 });
   } catch (error) {
     console.error("[POST /api/sticker-experience]", error);
-
-    // Handle unique constraint violation
-    if (error.code === "P2002") {
-      return NextResponse.json(
-        { error: "Code collision. Please try again." },
-        { status: 409 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Server error. Failed to create sticker experience." },
-      { status: 500 }
-    );
+    if (error.code === "P2002") return NextResponse.json({ error: "Code already exists" }, { status: 409 });
+    return NextResponse.json({ error: "Failed to create sticker experience" }, { status: 500 });
   }
 }

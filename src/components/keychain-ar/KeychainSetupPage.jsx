@@ -13,15 +13,15 @@ import ImageUpload from "@/components/keychain-ar/ImageUpload";
 export default function KeychainSetupPage({ code }) {
   const router = useRouter();
 
-  const [imageUrl,     setImageUrl]     = useState("");
-  const [message,      setMessage]      = useState("");
-  const [submitting,   setSubmitting]   = useState(false);
-  const [error,        setError]        = useState("");
-  const [step,         setStep]         = useState(1); // 1 = upload, 2 = message, 3 = confirm
+  const [imageUrl, setImageUrl] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [step, setStep] = useState(1); // 1 = upload, 2 = message, 3 = confirm
 
   const canProceedStep1 = !!imageUrl;
   const canProceedStep2 = message.trim().length > 0;
-  const canSubmit       = canProceedStep1 && canProceedStep2 && !submitting;
+  const canSubmit = canProceedStep1 && canProceedStep2 && !submitting;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -30,9 +30,9 @@ export default function KeychainSetupPage({ code }) {
 
     try {
       const res = await fetch("/api/keychain-claim", {
-        method : "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body   : JSON.stringify({ code, imageUrl, message: message.trim() }),
+        body: JSON.stringify({ code, imageUrl, message: message.trim() }),
       });
 
       const data = await res.json();
@@ -52,7 +52,6 @@ export default function KeychainSetupPage({ code }) {
 
       // Success — reload the page; server will now serve WebXRWrapper
       router.replace(`/keychain/${code}`);
-
     } catch {
       setError("Network error. Please check your connection and try again.");
       setSubmitting(false);
@@ -60,198 +59,236 @@ export default function KeychainSetupPage({ code }) {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-[#080808] text-white">
-      <div className="flex flex-col items-center justify-center min-h-full px-5 py-12">
+    <div className="min-h-screen w-full overflow-y-auto selection:bg-sc-pink selection:text-white relative z-0">
+      
+      {/* Background Decorative Blobs */}
+      <div className="fixed top-[10%] left-[5%] sc-blob bg-sc-cyan w-40 h-40 border-4 border-black animate-funky -z-10 opacity-30 md:opacity-100"></div>
+      <div className="fixed bottom-[10%] right-[5%] sc-blob bg-sc-yellow w-64 h-64 border-4 border-black animate-funky -z-10 opacity-30 md:opacity-100" style={{ animationDelay: '1s' }}></div>
 
-      {/* Header */}
-      <div className="w-full max-w-md mb-8 text-center">
-        <div className="font-mono text-[10px] tracking-[0.3em] text-cyan-400/70 uppercase mb-3">
-          SCANOVA · Keychain Activation
+      <div className="flex flex-col items-center justify-center min-h-full px-4 py-12 md:py-20 relative z-10">
+        
+        {/* Header */}
+        <div className="w-full max-w-lg mb-10 text-center">
+          <div className="bg-white border-4 border-black rounded-full px-4 py-2 inline-block mb-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transform -rotate-2">
+            <span className="font-heading text-sc-purple uppercase tracking-widest text-sm md:text-base">
+              Activation Portal
+            </span>
+          </div>
+          <h1 className="font-heading text-5xl md:text-7xl text-black drop-shadow-[4px_4px_0px_rgba(244,114,182,1)] [-webkit-text-stroke:2px_white] mb-6">
+            MAKE IT YOURS
+          </h1>
+          <p className="sc-slogan bg-white px-6 py-4 border-4 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transform rotate-1 text-xl md:text-2xl leading-snug mx-auto max-w-sm">
+            Upload a photo & drop a secret message. Your AR magic awaits!
+          </p>
         </div>
-        <h1 className="font-serif text-3xl font-normal text-white mb-2">
-          Make It Yours
-        </h1>
-        <p className="font-mono text-sm text-white/40 leading-relaxed">
-          Upload a photo and write a secret message. When someone scans this keychain, your AR experience appears.
-        </p>
-      </div>
 
-      {/* Step indicator */}
-      <div className="flex items-center gap-3 mb-8">
-        {[1, 2, 3].map((s) => (
-          <div key={s} className="flex items-center gap-3">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all duration-300 ${
-              step > s
-                ? "bg-green-400/20 border border-green-400/50 text-green-400"
-                : step === s
-                ? "bg-cyan-400/15 border border-cyan-400/50 text-cyan-400"
-                : "bg-white/5 border border-white/10 text-white/30"
-            }`}>
-              {step > s ? "✓" : s}
-            </div>
-            {s < 3 && (
-              <div className={`h-[1px] w-8 transition-all duration-500 ${step > s ? "bg-green-400/40" : "bg-white/10"}`} />
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Card */}
-      <div className="w-full max-w-md bg-white/[0.03] border border-white/[0.08] rounded-2xl p-7">
-
-        {/* ── STEP 1: Photo upload ── */}
-        {step === 1 && (
-          <div className="flex flex-col gap-5">
-            <StepLabel num="01" text="Upload Your Cover Photo" />
-            <p className="font-mono text-xs text-white/35 -mt-2 leading-relaxed">
-              This photo appears floating in AR when the keychain is scanned.
-            </p>
-            <ImageUpload onUploadComplete={(url) => setImageUrl(url)} />
-            <button
-              onClick={() => setStep(2)}
-              disabled={!canProceedStep1}
-              className={`w-full py-4 rounded-xl font-serif font-bold text-sm tracking-widest border-none transition-all duration-200 ${
-                canProceedStep1
-                  ? "bg-gradient-to-r from-cyan-400 to-blue-500 text-black cursor-pointer shadow-[0_0_30px_rgba(0,229,255,0.25)]"
-                  : "bg-white/5 text-white/20 cursor-not-allowed"
-              }`}
-            >
-              Next — Add Message →
-            </button>
-          </div>
-        )}
-
-        {/* ── STEP 2: Message ── */}
-        {step === 2 && (
-          <div className="flex flex-col gap-5">
-            <StepLabel num="02" text="Your Hidden AR Message" />
-            <p className="font-mono text-xs text-white/35 -mt-2 leading-relaxed">
-              This glowing text appears in 3D above your photo. Only visible in AR.
-            </p>
-
-            <div className="relative">
-              <input
-                type="text"
-                autoFocus
-                maxLength={40}
-                placeholder="e.g. Happy Anniversary ❤️"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="w-full px-4 py-3.5 bg-white/[0.04] border border-white/10 rounded-xl text-white text-base font-serif placeholder:text-white/25 outline-none focus:border-cyan-400/40 transition-colors"
-              />
-              <span className={`absolute right-3 bottom-3 font-mono text-[10px] ${message.length > 35 ? "text-amber-400" : "text-white/25"}`}>
-                {message.length}/40
-              </span>
-            </div>
-
-            {/* Preview */}
-            {message && (
-              <div className="p-3 bg-black/40 border border-cyan-400/10 rounded-xl text-center">
-                <div className="font-mono text-[10px] text-cyan-400/50 uppercase tracking-widest mb-1">Preview in AR</div>
-                <div className="font-serif text-lg text-amber-400" style={{ textShadow: "0 0 20px rgba(0,229,255,0.5)" }}>
-                  {message}
+        {/* Step indicator */}
+        <div className="flex items-center gap-2 sm:gap-4 mb-8">
+          {[1, 2, 3].map((s) => {
+            const isActive = step === s;
+            const isPast = step > s;
+            return (
+              <div key={s} className="flex items-center gap-2 sm:gap-4">
+                <div
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-heading text-xl sm:text-2xl border-4 transition-all duration-300 ${
+                    isPast
+                      ? "bg-sc-cyan border-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      : isActive
+                      ? "bg-sc-yellow border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transform scale-110"
+                      : "bg-white border-gray-300 text-gray-300"
+                  }`}
+                >
+                  {isPast ? "✓" : s}
                 </div>
+                {s < 3 && (
+                  <div
+                    className={`h-2 w-8 sm:w-12 rounded-full border-2 transition-all duration-500 ${
+                      isPast ? "bg-black border-black" : "bg-gray-200 border-gray-300"
+                    }`}
+                  />
+                )}
               </div>
-            )}
+            );
+          })}
+        </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setStep(1)}
-                className="flex-1 py-3.5 rounded-xl font-mono text-xs tracking-widest text-white/40 border border-white/[0.08] bg-transparent cursor-pointer hover:border-white/20 transition-colors"
-              >
-                ← Back
-              </button>
-              <button
-                onClick={() => setStep(3)}
-                disabled={!canProceedStep2}
-                className={`flex-[2] py-3.5 rounded-xl font-serif font-bold text-sm tracking-widest border-none transition-all duration-200 ${
-                  canProceedStep2
-                    ? "bg-gradient-to-r from-cyan-400 to-blue-500 text-black cursor-pointer"
-                    : "bg-white/5 text-white/20 cursor-not-allowed"
-                }`}
-              >
-                Review & Activate →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 3: Confirm ── */}
-        {step === 3 && (
-          <div className="flex flex-col gap-5">
-            <StepLabel num="03" text="Confirm Your Experience" />
-            <p className="font-mono text-xs text-white/35 -mt-2 leading-relaxed">
-              Once activated, this keychain is permanently linked to your photo and message.
-            </p>
-
-            {/* Preview card */}
-            <div className="rounded-xl overflow-hidden border border-white/[0.08] bg-black/40">
-              {/* Image preview */}
-              <div className="relative w-full aspect-square bg-black/60">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imageUrl}
-                  alt="Your AR photo"
-                  className="w-full h-full object-cover opacity-90"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        {/* Main Card */}
+        <div className="w-full max-w-md sc-card relative">
+          
+          {/* ── STEP 1: Photo upload ── */}
+          {step === 1 && (
+            <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <StepLabel num="01" text="Upload Cover Photo" />
+              <p className="font-sans font-bold text-gray-600 -mt-2 text-sm sm:text-base">
+                This photo appears floating in AR when the keychain is scanned. Make it pop!
+              </p>
+              
+              {/* Wraps external ImageUpload for consistent spacing */}
+              <div className="bg-gray-50 border-4 border-dashed border-black rounded-xl p-2 hover:bg-sc-yellow/10 transition-colors">
+                <ImageUpload onUploadComplete={(url) => setImageUrl(url)} />
               </div>
-              {/* Message */}
-              <div className="px-4 py-3 flex items-center gap-3 border-t border-white/[0.06]">
-                <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest shrink-0">Message</div>
-                <div className="font-serif text-white/90 truncate">{message}</div>
-              </div>
-            </div>
 
-            {/* Warning */}
-            <div className="px-4 py-3 bg-amber-400/5 border border-amber-400/20 rounded-xl font-mono text-[11px] text-amber-400/70 leading-relaxed">
-              ⚠️ This action is permanent. Your photo and message cannot be changed after activation.
-            </div>
-
-            {error && (
-              <div className="px-4 py-3 bg-red-500/10 border border-red-500/25 rounded-xl font-mono text-xs text-red-400">
-                ❌ {error}
-              </div>
-            )}
-
-            <div className="flex gap-3">
               <button
                 onClick={() => setStep(2)}
-                disabled={submitting}
-                className="flex-1 py-3.5 rounded-xl font-mono text-xs tracking-widest text-white/40 border border-white/[0.08] bg-transparent cursor-pointer hover:border-white/20 transition-colors disabled:opacity-50"
-              >
-                ← Back
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-                className={`flex-[2] py-3.5 rounded-xl font-serif font-bold text-sm tracking-widest border-none transition-all duration-200 ${
-                  canSubmit
-                    ? "bg-gradient-to-r from-green-400 to-emerald-500 text-black cursor-pointer shadow-[0_0_30px_rgba(0,255,136,0.2)]"
-                    : "bg-white/5 text-white/20 cursor-not-allowed"
+                disabled={!canProceedStep1}
+                className={`w-full py-4 rounded-xl font-heading text-xl sm:text-2xl uppercase border-4 border-black transition-all duration-200 mt-2 ${
+                  canProceedStep1
+                    ? "bg-sc-yellow text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sc-btn-push"
+                    : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
                 }`}
               >
-                {submitting ? "Activating…" : "✦ Activate AR Keychain"}
+                Next Step ↗
               </button>
             </div>
-          </div>
-        )}
-      </div>
+          )}
 
-      {/* Code badge */}
-      <div className="mt-6 font-mono text-[10px] text-white/20 tracking-widest">
-        KEYCHAIN CODE · {code.toUpperCase()}
+          {/* ── STEP 2: Message ── */}
+          {step === 2 && (
+            <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <StepLabel num="02" text="Hidden AR Message" />
+              <p className="font-sans font-bold text-gray-600 -mt-2 text-sm sm:text-base">
+                This funky text bursts out in 3D above your photo. Only visible in AR.
+              </p>
+
+              <div className="relative transform rotate-1">
+                <input
+                  type="text"
+                  autoFocus
+                  maxLength={40}
+                  placeholder="e.g. Stay Funky! ✌️"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full px-4 py-4 bg-white border-4 border-black rounded-xl text-black text-lg font-sans font-bold placeholder:text-gray-400 outline-none focus:bg-sc-yellow/20 focus:border-sc-pink shadow-[inset_4px_4px_0px_0px_rgba(0,0,0,0.05)] transition-colors"
+                />
+                <span
+                  className={`absolute right-4 bottom-4 font-heading text-sm sm:text-base ${
+                    message.length > 35 ? "text-sc-pink" : "text-gray-400"
+                  }`}
+                >
+                  {message.length}/40
+                </span>
+              </div>
+
+              {/* Live Preview */}
+              {message && (
+                <div className="p-6 bg-sc-purple border-4 border-black rounded-xl text-center transform -rotate-2 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mt-2">
+                  <div className="font-heading text-xs text-white uppercase tracking-widest mb-3 bg-black inline-block px-3 py-1 rounded-full border-2 border-white">
+                    AR PREVIEW
+                  </div>
+                  <div className="font-handwritten text-3xl sm:text-4xl text-sc-yellow drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] leading-tight">
+                    {message}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-4 mt-2">
+                <button
+                  onClick={() => setStep(1)}
+                  className="w-1/3 py-4 rounded-xl font-heading text-lg text-black border-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sc-btn-push uppercase"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={() => setStep(3)}
+                  disabled={!canProceedStep2}
+                  className={`w-2/3 py-4 rounded-xl font-heading text-xl uppercase border-4 border-black transition-all duration-200 ${
+                    canProceedStep2
+                      ? "bg-sc-cyan text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sc-btn-push"
+                      : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+                  }`}
+                >
+                  Review ↗
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 3: Confirm ── */}
+          {step === 3 && (
+            <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <StepLabel num="03" text="Lock It In" />
+              <p className="font-sans font-bold text-gray-600 -mt-2 text-sm sm:text-base">
+                Almost done! Check your drop. Once activated, it's permanently burned into the blockchain... kidding, but it IS permanent.
+              </p>
+
+              {/* Final Preview Card */}
+              <div className="rounded-2xl overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transform rotate-1">
+                <div className="relative w-full aspect-square bg-white">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageUrl}
+                    alt="Your AR photo"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="px-4 py-4 bg-sc-cyan border-t-4 border-black flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                  <div className="bg-white border-2 border-black px-2 py-1 rounded font-heading text-xs text-black uppercase shrink-0">
+                    Message
+                  </div>
+                  <div className="font-handwritten text-2xl text-black truncate w-full">
+                    {message}
+                  </div>
+                </div>
+              </div>
+
+              {/* Warning */}
+              <div className="px-4 py-4 bg-sc-yellow border-4 border-black rounded-xl font-sans font-bold text-black flex gap-3 transform -rotate-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <span className="text-2xl">⚠️</span>
+                <span className="text-sm">Cannot be edited after activation!</span>
+              </div>
+
+              {error && (
+                <div className="px-4 py-4 bg-sc-pink border-4 border-black rounded-xl font-sans font-bold text-white text-sm transform rotate-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-bounce-slow">
+                  ❌ {error}
+                </div>
+              )}
+
+              <div className="flex gap-4 mt-2">
+                <button
+                  onClick={() => setStep(2)}
+                  disabled={submitting}
+                  className="w-1/3 py-4 rounded-xl font-heading text-lg text-black border-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sc-btn-push uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={!canSubmit}
+                  className={`w-2/3 py-4 rounded-xl font-heading text-xl uppercase border-4 border-black transition-all duration-200 ${
+                    canSubmit
+                      ? "bg-sc-pink text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sc-btn-push"
+                      : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+                  }`}
+                >
+                  {submitting ? "ACTIVATING..." : "ACTIVATE ↗"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Code badge */}
+        <div className="mt-12 bg-white border-4 border-black rounded-full px-6 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transform -rotate-2">
+          <span className="font-heading text-sm sm:text-base text-black tracking-widest uppercase">
+            ID: {code}
+          </span>
+        </div>
+
       </div>
-    </div>
     </div>
   );
 }
 
+// Sub-component for funky step headers
 function StepLabel({ num, text }) {
   return (
-    <div>
-      <div className="font-mono text-[10px] tracking-[0.25em] text-cyan-400/60 uppercase mb-1">{num}</div>
-      <div className="font-serif text-xl text-white">{text}</div>
+    <div className="flex items-center gap-3 border-b-4 border-black pb-4 mb-2">
+      <div className="bg-black text-white font-heading text-xl px-3 py-1 rounded-lg border-2 border-black transform -rotate-3">
+        {num}
+      </div>
+      <h2 className="font-heading text-2xl sm:text-3xl text-black m-0 leading-none">
+        {text}
+      </h2>
     </div>
   );
 }
