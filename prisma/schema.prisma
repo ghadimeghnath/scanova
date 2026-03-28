@@ -8,46 +8,123 @@ datasource db {
 }
 
 // ── Keychain AR experiences ───────────────────────────────────────────────────
-// Flow:
-//   1. Admin pre-generates codes (claimed=false, no imageUrl/message yet)
-//   2. User scans QR → lands on /keychain/[code]
-//   3. If claimed=false → show setup form → user uploads photo + message
-//   4. On submit → claimed=true, imageUrl+message saved
-//   5. Future scans → go straight to AR (no re-upload)
 model ARExperience {
   id        String   @id @default(cuid())
-  code      String   @unique               // printed on keychain QR
-  message   String   @default("")          // set by user on first scan
-  imageUrl  String   @default("")          // set by user on first scan
+  code      String   @unique
+  message   String   @default("")
+  imageUrl  String   @default("")
   type      String   @default("keychain")
-  claimed   Boolean  @default(false)   
-  
-  // ── NEW: physical keychain design theme ──────────────────────────────────
-  // Maps to the index of the target image inside /public/master-themes.mind
-  // Values: "love" | "celebration" | "memory" | "achievement" | "custom"
+  claimed   Boolean  @default(false)
   theme     String   @default("love")
-  
-      // false = blank QR, true = activated
   isActive  Boolean  @default(true)
   scanCount Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Link to an order item after purchase
+  orderItem OrderItem?
+
   @@index([code])
 }
 
 // ── Sticker AR experiences ────────────────────────────────────────────────────
-// Admin creates these directly with all data pre-set.
 model StickerExperience {
   id          String   @id @default(cuid())
   code        String   @unique
-  targetImage String                        // .mind file URL
-  assetUrl    String   @default("")         // .glb URL (optional)
+  targetImage String
+  assetUrl    String   @default("")
   message     String   @default("")
   isActive    Boolean  @default(true)
   scanCount   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  orderItem OrderItem?
+
   @@index([code])
+}
+
+// ── Products (shop inventory) ─────────────────────────────────────────────────
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String   @default("")
+  type        String   // "keychain" | "sticker"
+  price       Int      // in paise (INR × 100)
+  stock       Int      @default(0)
+  isActive    Boolean  @default(true)
+  imageUrl    String   @default("")
+  features    String[] @default([])
+  theme       String   @default("love") // for keychains
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
+
+  @@index([slug])
+  @@index([type])
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────────
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique // e.g. SCNV-00001
+  status          String      @default("pending") // pending | confirmed | processing | shipped | delivered | cancelled
+  paymentStatus   String      @default("pending") // pending | paid | failed | refunded
+  paymentMethod   String      @default("cod")     // cod | razorpay | stripe
+  paymentId       String?     // gateway payment id
+
+  // Customer info
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+
+  // Shipping address
+  addressLine1    String
+  addressLine2    String  @default("")
+  city            String
+  state           String
+  pincode         String
+  country         String  @default("India")
+
+  // Pricing
+  subtotal        Int     // paise
+  shippingCharge  Int     @default(0)
+  discount        Int     @default(0)
+  total           Int     // paise
+
+  notes           String  @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  items           OrderItem[]
+
+  @@index([orderNumber])
+  @@index([customerEmail])
+  @@index([status])
+}
+
+// ── Order Items ───────────────────────────────────────────────────────────────
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productId   String
+  quantity    Int      @default(1)
+  unitPrice   Int      // paise at time of purchase
+  total       Int      // paise
+
+  // Link to AR experience assigned after order confirmed
+  arExperienceId      String?  @unique
+  stickerExperienceId String?  @unique
+
+  createdAt   DateTime @default(now())
+
+  order             Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product           Product            @relation(fields: [productId], references: [id])
+  arExperience      ARExperience?      @relation(fields: [arExperienceId], references: [id])
+  stickerExperience StickerExperience? @relation(fields: [stickerExperienceId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }

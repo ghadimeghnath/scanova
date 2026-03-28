@@ -1,3 +1,5 @@
+// app/(user)/sticker/[code]/page.jsx
+
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import StickerWrapper from "@/components/sticker-ar/StickerWrapper";

@@ -10,9 +10,11 @@ import KeychainSetupPage from "@/components/keychain-ar/KeychainSetupPage";
 
 // ── Dynamic Imports (Load heavy AR engines only on client side) ──────────────
 const LoadingScreen = () => (
-  <div className="fixed inset-0 bg-[#080808] flex flex-col items-center justify-center gap-4 font-mono text-white/40 text-xs tracking-[0.15em]">
-    <div className="w-9 h-9 border-2 border-[#00e5ff]/30 border-t-[#00e5ff] rounded-full animate-spin" />
-    LOADING AR ENGINE…
+  <div className="fixed inset-0 bg-background flex flex-col items-center justify-center gap-6 z-50">
+    <div className="w-16 h-16 bg-sc-cyan border-4 border-black sc-blob animate-spin shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" />
+    <div className="font-heading text-2xl uppercase text-foreground tracking-wide">
+      Loading Engine...
+    </div>
   </div>
 );
 
@@ -125,63 +127,57 @@ export default function ScannerPage() {
     scanningRef.current = false;
     cancelAnimationFrame(rafRef.current);
     stopCamera();
-    
+ 
     let code = rawUrl.trim();
-    let type = "keychain"; // Default assumption
     setScannedCode(code);
     setScanState("fetching");
-
-    // 🔥 UPGRADED PARSING: Bulletproof string manipulation instead of URL()
-    // Strips http://, https://, and www. to make splitting predictable
+ 
+    // Strip protocol + www for predictable parsing
     const cleanUrl = code.replace(/^(https?:\/\/)?(www\.)?/, "");
-    const parts = cleanUrl.split("/").filter(Boolean);
-
+    const parts    = cleanUrl.split("/").filter(Boolean);
+ 
     if (parts.includes("sticker")) {
-      type = "sticker";
-      const idx = parts.indexOf("sticker");
-      code = parts[idx + 1] || code; // Grab the part right after "sticker"
-    } else if (parts.includes("keychain")) {
-      type = "keychain";
-      const idx = parts.indexOf("keychain");
-      code = parts[idx + 1] || code; // Grab the part right after "keychain"
-    } else {
-      // If no keywords exist, assume the whole string (or last part) is just a keychain code
-      code = parts[parts.length - 1]; 
+      // ── Sticker: the page route already does the DB lookup + AR render.
+      // Just navigate there directly — no sticker-payload API needed.
+      const idx  = parts.indexOf("sticker");
+      const stickerCode = parts[idx + 1] || parts[parts.length - 1];
+      window.location.href = `/sticker/${stickerCode}`;
+      return;
     }
-
-    setProductType(type);
-
-    // Build the correct API endpoint
-    const endpoint = type === "sticker" 
-      ? `/api/sticker-payload/${encodeURIComponent(code)}` 
-      : `/api/keychain-payload/${encodeURIComponent(code)}`;
-
+ 
+    // ── Keychain: fetch payload then decide claimed vs setup ──────────────
+    let keychainCode = code;
+    if (parts.includes("keychain")) {
+      const idx = parts.indexOf("keychain");
+      keychainCode = parts[idx + 1] || parts[parts.length - 1];
+    } else {
+      keychainCode = parts[parts.length - 1];
+    }
+ 
+    setProductType("keychain");
+ 
     try {
-      const res = await fetch(endpoint);
-      
-      // Detailed error capturing
-      if (!res.ok) { 
+      const res = await fetch(`/api/keychain-payload/${encodeURIComponent(keychainCode)}`, {
+        headers: { "ngrok-skip-browser-warning": "true" },
+      });
+ 
+      if (!res.ok) {
         const errText = await res.text();
         try {
           const data = JSON.parse(errText);
-          setError(data.error || `Code not found in database.`); 
+          setError(data.error || "Code not found in database.");
         } catch {
           setError(`API Error ${res.status}: Is your database connected?`);
         }
-        return; 
+        return;
       }
-
+ 
       const data = await res.json();
       setPayload(data);
-
-      if (type === "keychain") {
-        setScanState(data.claimed ? "ar" : "setup");
-      } else {
-        setScanState("ar"); // Stickers skip setup phase
-      }
-      
-    } catch (err) {
-      setError(`Network failed. Check your internet connection.`);
+      setScanState(data.claimed ? "ar" : "setup");
+ 
+    } catch {
+      setError("Network failed. Check your internet connection.");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -240,29 +236,33 @@ export default function ScannerPage() {
 
   // ── Scanner UI ───────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 bg-[#080808] flex flex-col items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-background">
 
       {scanState === "init" && (
-        <div className="flex flex-col items-center gap-8 px-8 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-4xl">
-            📷
+        <div className="flex flex-col items-center gap-6 px-6 text-center z-10">
+          <div className="sc-blob w-32 h-32 bg-sc-cyan border-4 border-black flex items-center justify-center text-6xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] animate-funky mb-4">
+            📸
           </div>
-          <div>
-            <div className="font-mono text-[10px] tracking-[0.35em] text-cyan-400/70 uppercase mb-3">
-              SCANOVA · Universal Scanner
-            </div>
-            <h1 className="font-serif text-3xl text-white mb-3">Scan Code</h1>
-            <p className="font-mono text-xs text-white/35 leading-relaxed max-w-xs">
-              Point your camera at the QR code on your keychain or sticker packaging to activate the AR experience.
+          
+          <div className="sc-card flex flex-col items-center">
+            <div className="sc-slogan mb-1 text-sc-pink">scanova unchained</div>
+            <h1 className="text-5xl md:text-6xl text-foreground mb-4 drop-shadow-[4px_4px_0_var(--color-sc-yellow)]">
+              Scan Code
+            </h1>
+            <p className="font-sans font-bold text-lg text-foreground/80 leading-relaxed max-w-sm mb-6">
+              Point your camera at the QR code on your keychain or sticker packaging to activate the AR experience!
             </p>
+            
+            <button
+              onClick={handleStart}
+              className="w-full py-4 bg-sc-purple text-white font-heading text-2xl tracking-wide rounded-xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sc-btn-push"
+            >
+              LET'S GO! 🚀
+            </button>
           </div>
-          <button
-            onClick={handleStart}
-            className="px-10 py-4 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full text-black font-bold text-base tracking-widest font-serif border-none cursor-pointer shadow-[0_0_40px_rgba(0,229,255,0.3)]"
-          >
-            ✦ TAP TO SCAN
-          </button>
-          <p className="font-mono text-[10px] text-white/20 tracking-widest">Camera access required</p>
+          <p className="font-handwritten text-lg text-foreground/60 font-bold mt-2">
+            * Camera access required
+          </p>
         </div>
       )}
 
@@ -271,64 +271,70 @@ export default function ScannerPage() {
           <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover" />
           <canvas ref={canvasRef} className="hidden" />
 
-          <div className="relative z-10 flex flex-col items-center justify-between h-full py-14 pointer-events-none">
-            <div className="font-serif text-lg tracking-[0.25em] text-white/60 uppercase">SCANOVA</div>
+          {/* Funky AR Frame Overlay */}
+          <div className="ar-funky-frame hidden md:block" />
 
-            <div className="relative w-64 h-64">
-              {[
-                "top-0 left-0 border-t-2 border-l-2",
-                "top-0 right-0 border-t-2 border-r-2",
-                "bottom-0 left-0 border-b-2 border-l-2",
-                "bottom-0 right-0 border-b-2 border-r-2",
-              ].map((cls, i) => (
-                <div key={i} className={`absolute w-8 h-8 border-cyan-400 opacity-80 ${cls}`} />
-              ))}
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-[scan-move_2s_ease-in-out_infinite_alternate]" />
+          <div className="relative z-10 flex flex-col items-center justify-between h-full py-16 pointer-events-none">
+            <h2 className="font-heading text-3xl tracking-widest text-white drop-shadow-[4px_4px_0_var(--color-sc-purple-dark)] uppercase">
+              Scanova
+            </h2>
+
+            <div className="relative w-72 h-72 border-8 border-sc-yellow rounded-3xl overflow-hidden shadow-[8px_8px_0px_0px_var(--color-sc-pink)] box-content bg-black/20 backdrop-blur-sm">
+              {/* Animated scanning bar */}
+              <div className="absolute inset-x-0 top-0 h-4 bg-sc-cyan border-y-2 border-black animate-[scan-move_2s_ease-in-out_infinite_alternate] shadow-[0_0_20px_var(--color-sc-cyan)]" />
             </div>
 
-            <div className="px-6 py-3 bg-black/70 border border-white/10 rounded-full font-mono text-xs text-white/50 tracking-widest backdrop-blur-md">
-              SCAN COMPANION QR CODE
+            <div className="ar-status-pill animate-funky pointer-events-auto text-xl">
+              POINT AT QR CODE
             </div>
           </div>
 
           <style>{`
             @keyframes scan-move {
               0%   { transform: translateY(0); }
-              100% { transform: translateY(256px); }
+              100% { transform: translateY(270px); }
             }
           `}</style>
         </>
       )}
 
       {scanState === "fetching" && (
-        <div className="flex flex-col items-center gap-6 px-8 text-center">
-          <div className="w-9 h-9 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
+        <div className="sc-card flex flex-col items-center gap-6 max-w-sm text-center animate-funky z-10">
+          <div className="w-16 h-16 bg-sc-pink border-4 border-black sc-blob animate-spin shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" />
+          
           <div>
-            <div className="font-serif text-xl text-white mb-2">Found {productType === 'sticker' ? 'Sticker' : 'Keychain'}</div>
-            <div className="font-mono text-[10px] text-white/30 mb-2 uppercase tracking-widest break-all">
+            <h2 className="text-3xl text-foreground mb-2">
+              Found {productType === 'sticker' ? 'Sticker' : 'Keychain'}!
+            </h2>
+            <div className="font-handwritten text-2xl text-sc-purple-dark mb-4 break-all">
               ID: {scannedCode.split("/").pop()}
             </div>
           </div>
-          <div className="font-mono text-[10px] tracking-widest text-white/40 animate-pulse">
-            FETCHING SECURE PAYLOAD…
+          
+          <div className="ar-status-pill text-lg w-full">
+            FETCHING PAYLOAD...
           </div>
         </div>
       )}
 
       {scanState === "error" && (
-        <div className="flex flex-col items-center gap-6 px-8 text-center max-w-sm">
-          <div className="text-4xl">⚠️</div>
-          <div>
-            <div className="font-serif text-xl text-white mb-2">Scan Failed</div>
-            <div className="font-mono text-xs text-red-400/80 leading-relaxed bg-red-400/10 border border-red-400/20 p-3 rounded-xl">
+        <div className="sc-card border-sc-pink flex flex-col items-center gap-6 max-w-sm text-center z-10">
+          <div className="text-6xl animate-bounce-slow drop-shadow-[4px_4px_0_var(--color-sc-pink)]">
+            💥
+          </div>
+          
+          <div className="w-full">
+            <h2 className="text-3xl text-sc-pink mb-4">Scan Failed</h2>
+            <div className="font-sans font-bold text-base text-foreground bg-gray-100 dark:bg-zinc-800 border-2 border-black p-4 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               {errorMsg}
             </div>
           </div>
+          
           <button
             onClick={restart}
-            className="px-8 py-3.5 mt-2 bg-white/[0.06] border border-white/10 rounded-full font-mono text-sm text-white/60 cursor-pointer hover:border-white/20 transition-colors"
+            className="w-full py-3 mt-2 bg-sc-yellow text-black font-heading text-xl rounded-xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sc-btn-push"
           >
-            ← Scan Again
+            TRY AGAIN 🔄
           </button>
         </div>
       )}
