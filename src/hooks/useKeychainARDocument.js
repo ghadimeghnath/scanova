@@ -18,7 +18,10 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Titan+One&family=Gochi+Hand&family=Plus+Jakarta+Sans:wght@400;700&display=swap');
+    
     *, *::before, *::after { box-sizing: border-box; }
     html, body {
       width: 100%; height: 100%;
@@ -72,14 +75,12 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
 
     async function buildARContent(anchor) {
       const group = new THREE.Group();
-      // Hide initially for GSAP entrance animation
       group.scale.set(0, 0, 0); 
       anchor.group.add(group);
 
-      // We will store objects we want to animate continuously
       const floaters = [];
 
-      // ── 1. Photo plane (Fixing dullness!) ──────────────────────────────────
+      // ── 1. Photo plane (FIXED Z-FIGHTING FLICKER) ─────────────────────────
       const photoUrl = \`${safeImage}\`;
       if (photoUrl) {
         const loader  = new THREE.TextureLoader();
@@ -89,123 +90,127 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
         }).catch(() => null);
 
         if (tex) {
-          // 🔥 CRITICAL FIX FOR DULL IMAGES: Use proper SRGB Color Space
           tex.colorSpace = THREE.SRGBColorSpace;
-          
-          // Better texture filtering for clarity
           tex.minFilter = THREE.LinearMipMapLinearFilter;
           tex.magFilter = THREE.LinearFilter;
           tex.generateMipmaps = true;
 
-          // Glowing backlight behind the photo to make it pop from the background
-          const glowMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.85, 0.85),
-            new THREE.MeshBasicMaterial({
-              color: 0x00e5ff,
-              transparent: true,
-              opacity: 0.3,
-              blending: THREE.AdditiveBlending // Makes it glow brightly
-            })
+          // Hard black offset shadow (Pushed furthest back)
+          const shadowMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.05, 1.05),
+            new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide })
           );
-          glowMesh.position.set(0, 0.35, -0.005);
-          group.add(glowMesh);
+          shadowMesh.position.set(0.04, -0.04, -0.04); 
+          
+          // Thick Black Border
+          const borderMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.05, 1.05),
+            new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide })
+          );
+          borderMesh.position.set(0, 0, -0.02);
 
-          // White border frame
+          // Inner White Frame
           const frameMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.82, 0.82),
+            new THREE.PlaneGeometry(1.0, 1.0),
             new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide })
           );
-          frameMesh.position.set(0, 0.35, 0.001);
-          group.add(frameMesh);
+          frameMesh.position.set(0, 0, 0.01);
 
-          // Photo itself
+          // Photo itself (Pulled furthest forward)
           const photoMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.78, 0.78),
+            new THREE.PlaneGeometry(0.95, 0.95),
             new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
           );
-          photoMesh.position.set(0, 0.35, 0.002);
+          photoMesh.position.set(0, 0, 0.03);
           
-          // Group the photo and frame together so they float together
           const photoGroup = new THREE.Group();
-          photoGroup.add(glowMesh, frameMesh, photoMesh);
+          photoGroup.add(shadowMesh, borderMesh, frameMesh, photoMesh);
           photoGroup.userData = { baseY: 0 };
           group.add(photoGroup);
           floaters.push(photoGroup);
         }
       }
 
-      // ── 2. Glowing message text (Fixing clarity!) ──────────────────────────
+      // ── 2. Funky Typography ─────────────────────────
       const msg = \`${safeMsg}\`;
       if (msg.trim()) {
+        try { await document.fonts.load('90px "Titan One"'); } catch(e) { console.warn("Font load failed"); }
+
         const canvas  = document.createElement('canvas');
-        // 🔥 CRITICAL FIX FOR BLURRY TEXT: Double the canvas resolution (DPI scaling)
         canvas.width  = 1024;
         canvas.height = 256;
         const ctx     = canvas.getContext('2d');
         ctx.clearRect(0, 0, 1024, 256);
 
-        // Heavy dark drop-shadow so text is readable on bright backgrounds
-        ctx.shadowColor = 'rgba(0,0,0,0.8)';
-        ctx.shadowBlur  = 15;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 4;
+        const textToRender = msg.slice(0, 30);
+        let fontSize = 90;
+        ctx.font = \`\${fontSize}px "Titan One", cursive\`;
         
-        ctx.font        = 'bold 90px Georgia, serif';
-        ctx.textAlign   = 'center';
-        ctx.textBaseline= 'middle';
-        
-        // Base white text
-        ctx.fillStyle   = '#ffffff';
-        ctx.fillText(msg.slice(0, 24), 512, 128);
+        const maxWidth = 960;
+        while (ctx.measureText(textToRender).width > maxWidth && fontSize > 30) {
+          fontSize -= 2;
+          ctx.font = \`\${fontSize}px "Titan One", cursive\`;
+        }
 
-        // Additive Glow Layer
-        ctx.shadowColor = '#00e5ff';
-        ctx.shadowBlur  = 30;
-        ctx.fillStyle   = '#00e5ff';
-        ctx.fillText(msg.slice(0, 24), 512, 128);
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        
+        ctx.shadowColor   = '#000000';
+        ctx.shadowBlur    = 0;
+        ctx.shadowOffsetX = 6;
+        ctx.shadowOffsetY = 6;
+        
+        ctx.lineWidth   = Math.max(8, fontSize / 6);
+        ctx.strokeStyle = '#000000';
+        ctx.strokeText(textToRender, 512, 128);
+
+        ctx.shadowColor = 'transparent';
+        ctx.fillStyle   = '#22D3EE'; 
+        ctx.fillText(textToRender, 512, 128);
 
         const textTex = new THREE.CanvasTexture(canvas);
-        textTex.colorSpace = THREE.SRGBColorSpace; // Keeps colors true
+        textTex.colorSpace = THREE.SRGBColorSpace;
         textTex.minFilter = THREE.LinearFilter;
 
         const textMesh = new THREE.Mesh(
-          new THREE.PlaneGeometry(1.2, 0.3), // Scaled to match new canvas ratio
+          new THREE.PlaneGeometry(1.4, 0.35),
           new THREE.MeshBasicMaterial({
             map        : textTex,
             transparent: true,
             side       : THREE.DoubleSide,
           })
         );
-        textMesh.position.set(0, -0.2, 0.005);
-        textMesh.userData = { baseY: -0.2 };
+        // Pulled forward slightly so it doesn't clip the shadow
+        textMesh.position.set(0, -0.7, 0.05);
+        textMesh.userData = { baseY: -0.7 };
         group.add(textMesh);
         floaters.push(textMesh);
       }
 
-      // ── 3. Particle ring ─────────────────────────────────────────────────
+      // ── 3. Solid Particle Confetti ────────────────────
       const particleGroup = new THREE.Group();
-      const COUNT = 60;
+      const COUNT = 40;
       const pos   = new Float32Array(COUNT * 3);
       for (let i = 0; i < COUNT; i++) {
         const a = (i / COUNT) * Math.PI * 2;
-        pos[i*3]   = Math.cos(a) * 0.5;
-        pos[i*3+1] = 0.005;
-        pos[i*3+2] = Math.sin(a) * 0.5;
+        pos[i*3]   = Math.cos(a) * 0.85; 
+        pos[i*3+1] = 0.02; // Brought forward to avoid clipping
+        pos[i*3+2] = Math.sin(a) * 0.85;
       }
       const pGeo = new THREE.BufferGeometry();
       pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      
       particleGroup.add(new THREE.Points(pGeo,
         new THREE.PointsMaterial({
-          color      : 0x00e5ff,
-          size       : 0.015,
-          transparent: true,
-          opacity    : 0.9,
-          blending   : THREE.AdditiveBlending
+          color       : 0xF472B6, 
+          size        : 0.035,    
+          transparent : true,
+          opacity     : 1.0,
+          blending    : THREE.NormalBlending
         })
       ));
       group.add(particleGroup);
 
-      // Return both the main group, the elements to float, and the particles
       return { mainGroup: group, floaters, particleGroup };
     }
 
@@ -233,15 +238,13 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
         const { renderer, scene, camera } = mindarThree;
 
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        // Tone mapping isn't strictly needed for MeshBasicMaterial, but good for overall scene config
         renderer.toneMapping         = THREE.NoToneMapping; 
-        renderer.outputColorSpace    = THREE.SRGBColorSpace; // CRITICAL for accurate colors
+        renderer.outputColorSpace    = THREE.SRGBColorSpace; 
         renderer.setClearColor(0x000000, 0); 
 
         const anchor = mindarThree.addAnchor(themeIndex);
         const { mainGroup, floaters, particleGroup } = await buildARContent(anchor);
 
-        // ── GSAP ANIMATIONS ────────────────────────────────────────────────
         let isAnimated = false;
         
         anchor.onTargetFound = () => {
@@ -250,24 +253,21 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
           if (!isAnimated) {
             isAnimated = true;
 
-            // 1. Entrance Pop Animation
             gsap.fromTo(mainGroup.scale, 
               { x: 0, y: 0, z: 0 }, 
               { x: 1, y: 1, z: 1, duration: 1.5, ease: "elastic.out(1, 0.5)" }
             );
 
-            // 2. Continuous Floating Animation for Photo and Text
             floaters.forEach((floater, i) => {
               gsap.to(floater.position, {
-                y: floater.userData.baseY + 0.05, // Float up by 5cm
-                duration: 2 + (i * 0.2), // Slight offset between photo and text
-                yoyo: true, // Go back down
-                repeat: -1, // Loop forever
+                y: floater.userData.baseY + 0.05,
+                duration: 2 + (i * 0.2), 
+                yoyo: true,
+                repeat: -1,
                 ease: "sine.inOut"
               });
             });
 
-            // 3. Continuous Spinning Particle Ring
             gsap.to(particleGroup.rotation, {
               y: Math.PI * 2,
               duration: 8,
@@ -279,14 +279,11 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
 
         anchor.onTargetLost = () => {
           notify('tracking');
-          // Optional: You could reset 'isAnimated' here if you want it to pop in every single time they lose/regain tracking.
-          // isAnimated = false; 
         };
 
         await mindarThree.start();
         notify('tracking');
 
-        // Render loop (no manual math needed, GSAP handles all the movement!)
         renderer.setAnimationLoop(() => {
           renderer.render(scene, camera);
         });
