@@ -8,7 +8,7 @@ const SERIF = "'Cormorant Garamond',Georgia,serif";
 function fmt(p) { return `₹${((p || 0) / 100).toLocaleString("en-IN")}`; }
 
 const THEMES = ["love", "celebration", "memory", "achievement", "custom"];
-const DEFAULT_KEYCHAIN_FEATURES = ["WebXR surface tracking", "Custom photo + text in AR", "Particle burst on placement", "Permanent — activated once"];
+const DEFAULT_KEYCHAIN_FEATURES = ["MindAR image tracking", "Custom photo + text in AR", "Particle burst on placement", "Permanent — activated once"];
 const DEFAULT_STICKER_FEATURES = ["Image recognition tracking", "3D chrome art overlay", "Safari + Chrome ready", "60fps on mid-range phones"];
 
 const BLANK = {

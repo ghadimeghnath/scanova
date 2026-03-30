@@ -57,7 +57,7 @@ function ScanCorners() {
 // ── Found border flash ────────────────────────────────────────────────────────
 function FoundFlash() {
   return (
-    <div className="ar-funky-frame border-green-400 opacity-80 animate-ping transition-colors duration-300" />
+    <div className="ar-funky-frame  border-green-400 opacity-80 transition-colors duration-300" />
   );
 }
 

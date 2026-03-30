@@ -14,13 +14,13 @@ export default function ImageUpload({ onUploadComplete }) {
   };
 
   return (
-    <div className={`flex flex-col items-center gap-4 p-6 border rounded-xl transition-all duration-200 ${
+    <div className={`flex flex-col items-center gap-6 p-8 border-4 transition-all duration-200 ${
       url
-        ? "border-green-400/30 bg-green-400/[0.03]"
-        : "border-dashed border-white/15 bg-white/[0.02]"
+        ? "border-purple-600 bg-purple-50 rounded-3xl"
+        : "border-dashed border-purple-400 bg-purple-100/30 rounded-3xl"
     }`}>
       {url ? (
-        <div className="relative w-36 h-36 rounded-xl overflow-hidden border border-white/10 shadow-lg">
+        <div className="relative w-40 h-40 rounded-2xl overflow-hidden border-4 border-purple-600 shadow-[6px_6px_0px_0px_rgba(124,58,237,0.3)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={url}
@@ -29,18 +29,18 @@ export default function ImageUpload({ onUploadComplete }) {
             className="w-full h-full object-cover"
           />
           {/* Green check overlay */}
-          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-green-400/90 flex items-center justify-center text-black text-xs font-bold">
+          <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-green-400 flex items-center justify-center text-black text-lg font-bold">
             ✓
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-2 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-2xl">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-purple-200 border-3 border-purple-600 flex items-center justify-center text-4xl">
             📷
           </div>
-          <div className="font-mono text-xs text-white/30 leading-relaxed">
+          <div className="font-mono text-sm font-bold text-purple-900 leading-relaxed">
             JPG · PNG · WEBP<br />
-            <span className="text-white/20">Max 10MB</span>
+            <span className="text-purple-700 text-xs font-normal">Max 10MB</span>
           </div>
         </div>
       )}
@@ -62,10 +62,10 @@ export default function ImageUpload({ onUploadComplete }) {
           <button
             type="button"
             onClick={() => open()}
-            className={`px-6 py-2.5 rounded-full font-serif font-bold text-sm tracking-wide border-none cursor-pointer transition-all ${
+            className={`px-8 py-3 rounded-full font-heading font-bold text-sm tracking-wide border-3 cursor-pointer transition-all ${
               url
-                ? "bg-white/[0.06] text-white/60 hover:bg-white/10"
-                : "bg-gradient-to-r from-cyan-400 to-blue-500 text-black shadow-[0_0_20px_rgba(0,229,255,0.2)]"
+                ? "bg-purple-100 text-purple-700 border-purple-400 hover:bg-purple-200 shadow-[3px_3px_0px_0px_rgba(168,85,247,0.2)]"
+                : "bg-gradient-to-r from-purple-500 to-purple-700 text-white border-purple-900 shadow-[6px_6px_0px_0px_rgba(88,28,135,0.4)] hover:shadow-[8px_8px_0px_0px_rgba(88,28,135,0.5)] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(88,28,135,0.3)]"
             }`}
           >
             {url ? "Change Photo" : "Choose Photo"}

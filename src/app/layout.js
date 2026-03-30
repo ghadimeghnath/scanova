@@ -1,3 +1,4 @@
+import Footer from "@/components/scanova/Footer";
 import "./globals.css";
 
 export const metadata = {
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="antialiased bg-[#080808]">
         {children}
+        <Footer />
       </body>
     </html>
   );

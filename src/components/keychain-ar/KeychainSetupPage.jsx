@@ -50,7 +50,7 @@ export default function KeychainSetupPage({ code }) {
         return;
       }
 
-      // Success — reload the page; server will now serve WebXRWrapper
+      // Success — reload the page; server will now serve the keychain AR experience
       router.replace(`/keychain/${code}`);
     } catch {
       setError("Network error. Please check your connection and try again.");
