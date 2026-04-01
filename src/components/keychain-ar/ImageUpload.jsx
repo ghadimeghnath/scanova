@@ -1,4 +1,3 @@
-// components/keychain-ar/ImageUpload.jsx
 "use client";
 
 import { CldUploadWidget } from "next-cloudinary";
@@ -8,9 +7,21 @@ export default function ImageUpload({ onUploadComplete }) {
   const [url, setUrl] = useState(null);
 
   const onSuccess = (result) => {
-    const u = result.info.secure_url;
-    setUrl(u);
-    onUploadComplete?.(u);
+    // result.info.secure_url is the ORIGINAL image.
+    // If the user cropped, we want the version with coordinates applied.
+    // Cloudinary provides 'thumbnail_url' or we can check for 'coordinates'.
+    
+    let finalUrl = result.info.secure_url;
+
+    // Check if cropping coordinates exist and apply them to the URL 
+    // or simply use the generated thumbnail if it suits your AR needs.
+    if (result.info.coordinates && result.info.coordinates.custom) {
+        // This ensures we get the cropped version specifically
+        finalUrl = result.info.secure_url.replace("/upload/", "/upload/c_crop,g_custom/");
+    }
+
+    setUrl(finalUrl);
+    onUploadComplete?.(finalUrl);
   };
 
   return (
@@ -28,7 +39,6 @@ export default function ImageUpload({ onUploadComplete }) {
             crossOrigin="anonymous"
             className="w-full h-full object-cover"
           />
-          {/* Green check overlay */}
           <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-green-400 flex items-center justify-center text-black text-lg font-bold">
             ✓
           </div>
@@ -40,7 +50,7 @@ export default function ImageUpload({ onUploadComplete }) {
           </div>
           <div className="font-mono text-sm font-bold text-purple-900 leading-relaxed">
             JPG · PNG · WEBP<br />
-            <span className="text-purple-700 text-xs font-normal">Max 10MB</span>
+            <span className="text-purple-700 text-xs font-normal">Max 5MB</span>
           </div>
         </div>
       )}
@@ -49,14 +59,40 @@ export default function ImageUpload({ onUploadComplete }) {
         uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
         onSuccess={onSuccess}
         options={{
-          maxFiles            : 1,
+          maxFiles: 1,
           clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
-          sources             : ["local", "camera"],
-          maxFileSize         : 10_000_000,
-          cropping            : true,        // let user crop to square
-          croppingAspectRatio : 1,
-          showSkipCropButton  : true,
-        }}
+          sources: ["local", "camera"],
+          // 1. Compression: Enforce 5MB limit
+          maxFileSize: 5000000, 
+          // 2. Cropping Logic
+          cropping: true,
+          croppingAspectRatio: 1,
+          showSkipCropButton: false, // Set to false to force users to crop to square
+          croppingShowDimensions: true,
+          // 3. Auto-format & Quality compression upon upload
+          resourceType: "image",
+          styles: {
+    palette: {
+      window: "#FFFFFF",
+      windowBorder: "#9073C1",
+      tabIcon: "#6B21A8",
+      menuIcons: "#5A616A",
+      textDark: "#000000",
+      textLight: "#FFFFFF",
+      link: "#7C3AED",
+      action: "#7C3AED",
+      inactiveTabIcon: "#E8D5FF",
+      error: "#F43F5E",
+      inProgress: "#7C3AED",
+      complete: "#22C55E",
+      sourceBg: "#F3F4F6"
+    },
+    fonts: {
+      default: null,
+      "'Fira Sans', sans-serif": "https://fonts.googleapis.com/css?family=Fira+Sans"
+    }
+  }
+}}
       >
         {({ open }) => (
           <button

@@ -1,5 +1,4 @@
 // hooks/useKeychainARDocument.js
-
 export const THEME_INDEX = {
   love        : 0,
   celebration : 1,
@@ -8,7 +7,13 @@ export const THEME_INDEX = {
   custom      : 4,
 };
 
-export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
+export function buildKeychainARDocument({ 
+  imageUrl, 
+  message, 
+  themeIndex = 0, 
+  themeBg = '#FDE047',  // Fallback Yellow
+  themeText = '#000000' // Fallback Black
+}) {
   const safeMsg   = (message  || "").replace(/\\/g, "\\\\").replace(/`/g, "\\`");
   const safeImage = (imageUrl || "").replace(/`/g, "\\`");
   const idx       = Number.isInteger(themeIndex) ? themeIndex : 0;
@@ -20,6 +25,7 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   
   <style>
+    /* Funky System Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Titan+One&family=Gochi+Hand&family=Plus+Jakarta+Sans:wght@400;700&display=swap');
     
     *, *::before, *::after { box-sizing: border-box; }
@@ -73,6 +79,13 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
     const notify = (phase, extra = {}) =>
       window.parent.postMessage({ type: 'mindar-phase', phase, ...extra }, '*');
 
+    // Dynamically injected colors from the user's selection!
+    const USER_BG_COLOR   = '${themeBg}';
+    const USER_TEXT_COLOR = '${themeText}';
+    
+    // Convert hex string (e.g., "#F472B6") to Three.js compatible hex number (e.g., 0xF472B6)
+    const bgHexColor = parseInt(USER_BG_COLOR.replace('#', '0x'), 16);
+
     async function buildARContent(anchor) {
       const group = new THREE.Group();
       group.scale.set(0, 0, 0); 
@@ -80,7 +93,7 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
 
       const floaters = [];
 
-      // ── 1. Photo plane (FIXED Z-FIGHTING FLICKER) ─────────────────────────
+      // ── 1. Photo Poster (Neobrutalist Frame & Tape) ─────────────────────────
       const photoUrl = \`${safeImage}\`;
       if (photoUrl) {
         const loader  = new THREE.TextureLoader();
@@ -95,7 +108,7 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
           tex.magFilter = THREE.LinearFilter;
           tex.generateMipmaps = true;
 
-          // Hard black offset shadow (Pushed furthest back)
+          // Hard black offset shadow
           const shadowMesh = new THREE.Mesh(
             new THREE.PlaneGeometry(1.05, 1.05),
             new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide })
@@ -109,101 +122,128 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
           );
           borderMesh.position.set(0, 0, -0.02);
 
-          // Inner White Frame
+          // Inner Frame colored by the user's theme selection!
           const frameMesh = new THREE.Mesh(
             new THREE.PlaneGeometry(1.0, 1.0),
-            new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide })
+            new THREE.MeshBasicMaterial({ color: bgHexColor, side: THREE.DoubleSide })
           );
           frameMesh.position.set(0, 0, 0.01);
 
-          // Photo itself (Pulled furthest forward)
+          // Photo itself
           const photoMesh = new THREE.Mesh(
             new THREE.PlaneGeometry(0.95, 0.95),
             new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
           );
           photoMesh.position.set(0, 0, 0.03);
+
+          // Funky Tape holding the photo
+          const tapeBorder = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.44, 0.16),
+            new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide })
+          );
+          tapeBorder.position.set(0, 0.52, 0.035);
+          tapeBorder.rotation.z = Math.PI / 16;
+
+          const tapeMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.4, 0.12),
+            new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
+          );
+          tapeMesh.position.set(0, 0.52, 0.04);
+          tapeMesh.rotation.z = Math.PI / 16;
           
           const photoGroup = new THREE.Group();
-          photoGroup.add(shadowMesh, borderMesh, frameMesh, photoMesh);
+          photoGroup.add(shadowMesh, borderMesh, frameMesh, photoMesh, tapeBorder, tapeMesh);
           photoGroup.userData = { baseY: 0 };
           group.add(photoGroup);
           floaters.push(photoGroup);
         }
       }
 
-      // ── 2. Funky Typography ─────────────────────────
+      // ── 2. Funky Message Box (Physical Label Style) ─────────────────────────
       const msg = \`${safeMsg}\`;
       if (msg.trim()) {
         try { await document.fonts.load('90px "Titan One"'); } catch(e) { console.warn("Font load failed"); }
 
         const canvas  = document.createElement('canvas');
         canvas.width  = 1024;
-        canvas.height = 256;
+        canvas.height = 300;
         const ctx     = canvas.getContext('2d');
-        ctx.clearRect(0, 0, 1024, 256);
+        ctx.clearRect(0, 0, 1024, 300);
 
+        // Draw Neobrutalist Shadow Box
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(40, 40, 944, 220); // Offset shadow
+
+        // Draw Main Label Box with user theme color
+        ctx.fillStyle = USER_BG_COLOR;
+        ctx.fillRect(20, 20, 944, 220);
+        
+        // Draw Thick Black Border
+        ctx.lineWidth = 16;
+        ctx.strokeStyle = '#000000';
+        ctx.strokeRect(20, 20, 944, 220);
+
+        // Typography Setup
         const textToRender = msg.slice(0, 30);
         let fontSize = 90;
-        ctx.font = \`\${fontSize}px "Titan One", cursive\`;
         
-        const maxWidth = 960;
+        // Emoji Font Fallbacks
+        const getFontString = (size) => \`\${size}px "Titan One", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif\`;
+        
+        ctx.font = getFontString(fontSize);
+        
+        const maxWidth = 800;
         while (ctx.measureText(textToRender).width > maxWidth && fontSize > 30) {
           fontSize -= 2;
-          ctx.font = \`\${fontSize}px "Titan One", cursive\`;
+          ctx.font = getFontString(fontSize);
         }
 
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
         
-        ctx.shadowColor   = '#000000';
-        ctx.shadowBlur    = 0;
-        ctx.shadowOffsetX = 6;
-        ctx.shadowOffsetY = 6;
-        
-        ctx.lineWidth   = Math.max(8, fontSize / 6);
-        ctx.strokeStyle = '#000000';
-        ctx.strokeText(textToRender, 512, 128);
-
-        ctx.shadowColor = 'transparent';
-        ctx.fillStyle   = '#22D3EE'; 
-        ctx.fillText(textToRender, 512, 128);
+        // Text colored by the user's theme selection
+        ctx.fillStyle = USER_TEXT_COLOR; 
+        ctx.fillText(textToRender, 492, 140);
 
         const textTex = new THREE.CanvasTexture(canvas);
         textTex.colorSpace = THREE.SRGBColorSpace;
         textTex.minFilter = THREE.LinearFilter;
 
         const textMesh = new THREE.Mesh(
-          new THREE.PlaneGeometry(1.4, 0.35),
+          new THREE.PlaneGeometry(1.6, 0.45),
           new THREE.MeshBasicMaterial({
             map        : textTex,
             transparent: true,
             side       : THREE.DoubleSide,
           })
         );
-        // Pulled forward slightly so it doesn't clip the shadow
-        textMesh.position.set(0, -0.7, 0.05);
-        textMesh.userData = { baseY: -0.7 };
+        
+        // Tilted slightly for that "slapped on sticker" vibe
+        textMesh.position.set(0, -0.75, 0.05);
+        textMesh.rotation.z = -Math.PI / 32;
+        textMesh.userData = { baseY: -0.75 };
         group.add(textMesh);
         floaters.push(textMesh);
       }
 
-      // ── 3. Solid Particle Confetti ────────────────────
+      // ── 3. Theme-Matched Solid Particle Confetti ────────────────────
       const particleGroup = new THREE.Group();
       const COUNT = 40;
       const pos   = new Float32Array(COUNT * 3);
       for (let i = 0; i < COUNT; i++) {
         const a = (i / COUNT) * Math.PI * 2;
-        pos[i*3]   = Math.cos(a) * 0.85; 
-        pos[i*3+1] = 0.02; // Brought forward to avoid clipping
-        pos[i*3+2] = Math.sin(a) * 0.85;
+        pos[i*3]   = Math.cos(a) * 0.9; 
+        pos[i*3+1] = 0.02; 
+        pos[i*3+2] = Math.sin(a) * 0.9;
       }
       const pGeo = new THREE.BufferGeometry();
       pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       
+      // Particles colored by user theme selection
       particleGroup.add(new THREE.Points(pGeo,
         new THREE.PointsMaterial({
-          color       : 0xF472B6, 
-          size        : 0.035,    
+          color       : bgHexColor, 
+          size        : 0.045,      
           transparent : true,
           opacity     : 1.0,
           blending    : THREE.NormalBlending
@@ -220,7 +260,7 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
         notify('loading');
 
         const mindSrc    = 'https://res.cloudinary.com/dcwlvb4kb/raw/upload/v1774536751/master-themes_vtfoan.mind';
-        const themeIndex = ${idx}; 
+        const targetIdx  = ${idx}; // Used purely for AR Tracking index
 
         const mindarThree = new MindARThree({
           container      : document.querySelector('#container'),
@@ -242,7 +282,7 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
         renderer.outputColorSpace    = THREE.SRGBColorSpace; 
         renderer.setClearColor(0x000000, 0); 
 
-        const anchor = mindarThree.addAnchor(themeIndex);
+        const anchor = mindarThree.addAnchor(targetIdx);
         const { mainGroup, floaters, particleGroup } = await buildARContent(anchor);
 
         let isAnimated = false;
@@ -260,8 +300,8 @@ export function buildKeychainARDocument({ imageUrl, message, themeIndex = 0 }) {
 
             floaters.forEach((floater, i) => {
               gsap.to(floater.position, {
-                y: floater.userData.baseY + 0.05,
-                duration: 2 + (i * 0.2), 
+                y: floater.userData.baseY + 0.06,
+                duration: 2 + (i * 0.3), 
                 yoyo: true,
                 repeat: -1,
                 ease: "sine.inOut"

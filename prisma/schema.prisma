@@ -9,20 +9,29 @@ datasource db {
 
 // ── Keychain AR experiences ───────────────────────────────────────────────────
 model ARExperience {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  message   String   @default("")
-  imageUrl  String   @default("")
-  type      String   @default("keychain")
-  claimed   Boolean  @default(false)
-  theme     String   @default("love")
-  isActive  Boolean  @default(true)
-  scanCount Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  code       String   @unique
+  message    String   @default("")
+  imageUrl   String   @default("")
+  type       String   @default("keychain")
+  claimed    Boolean  @default(false)
 
-  // Link to an order item after purchase
-  orderItem OrderItem?
+  // ── TWO SEPARATE FIELDS — never conflate these ──────────────────────────
+  // theme      = the PHYSICAL keychain design index (0-4).
+  //              Set by admin at bulk-generate time. Maps to addAnchor(theme)
+  //              in master-themes.mind. NEVER changed after creation.
+  // colorIndex = the AR overlay color the USER chose at claim time (0-4).
+  //              Defaults to match theme so unclaimed looks consistent,
+  //              but is set independently by the user during setup.
+  theme      Int      @default(0)
+  colorIndex Int      @default(0)
+
+  isActive   Boolean  @default(true)
+  scanCount  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  orderItem  OrderItem?
 
   @@index([code])
 }
@@ -50,13 +59,13 @@ model Product {
   name        String
   slug        String   @unique
   description String   @default("")
-  type        String   // "keychain" | "sticker"
-  price       Int      // in paise (INR × 100)
+  type        String
+  price       Int
   stock       Int      @default(0)
   isActive    Boolean  @default(true)
   imageUrl    String   @default("")
   features    String[] @default([])
-  theme       String   @default("love") // for keychains
+  theme       String   @default("love")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -68,33 +77,30 @@ model Product {
 
 // ── Orders ────────────────────────────────────────────────────────────────────
 model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique // e.g. SCNV-00001
-  status          String      @default("pending") // pending | confirmed | processing | shipped | delivered | cancelled
-  paymentStatus   String      @default("pending") // pending | paid | failed | refunded
-  paymentMethod   String      @default("cod")     // cod | razorpay | stripe
-  paymentId       String?     // gateway payment id
+  id              String   @id @default(cuid())
+  orderNumber     String   @unique
+  status          String   @default("pending")
+  paymentStatus   String   @default("pending")
+  paymentMethod   String   @default("cod")
+  paymentId       String?
 
-  // Customer info
   customerName    String
   customerEmail   String
   customerPhone   String
 
-  // Shipping address
   addressLine1    String
-  addressLine2    String  @default("")
+  addressLine2    String   @default("")
   city            String
   state           String
   pincode         String
-  country         String  @default("India")
+  country         String   @default("India")
 
-  // Pricing
-  subtotal        Int     // paise
-  shippingCharge  Int     @default(0)
-  discount        Int     @default(0)
-  total           Int     // paise
+  subtotal        Int
+  shippingCharge  Int      @default(0)
+  discount        Int      @default(0)
+  total           Int
 
-  notes           String  @default("")
+  notes           String   @default("")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -111,10 +117,9 @@ model OrderItem {
   orderId     String
   productId   String
   quantity    Int      @default(1)
-  unitPrice   Int      // paise at time of purchase
-  total       Int      // paise
+  unitPrice   Int
+  total       Int
 
-  // Link to AR experience assigned after order confirmed
   arExperienceId      String?  @unique
   stickerExperienceId String?  @unique
 

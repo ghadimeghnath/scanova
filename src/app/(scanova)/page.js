@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Footer from "@/components/scanova/Footer";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
@@ -81,7 +80,7 @@ export default function LandingPage() {
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section
-        className="min-h-screen flex flex-col items-center justify-center text-center pt-24 md:pt-32 px-4 md:px-6 pb-16 md:pb-20 relative overflow-hidden"
+        className="h-dvh flex flex-col items-center justify-center text-center pt-24 md:pt-32 px-4 md:px-6 pb-16 md:pb-20 relative z-10 overflow-hidden"
         ref={heroRef}
       >
         {/* Interactive Funky Background Blobs */}
@@ -145,7 +144,6 @@ export default function LandingPage() {
                 "AR Stickers",
                 "Image Tracking",
                 "Scan & Reveal",
-                "Funky 3D Art",
                 "No App Required",
               ].map((text, j) => (
                 <div
@@ -170,68 +168,10 @@ export default function LandingPage() {
       </div>
 
       {/* ── Products ─────────────────────────────────────────────────────────── */}
-      <section id="products" className="py-20 md:py-32 px-4 md:px-12 max-w-[1400px] mx-auto relative z-10 bg-white">
-        <div className="text-center mb-12 md:mb-20">
-          <h2 className="font-heading text-4xl sm:text-5xl md:text-7xl text-black [-webkit-text-stroke:1px_white] md:[-webkit-text-stroke:2px_white] drop-shadow-[6px_6px_0px_rgba(159,122,234,1)] md:drop-shadow-[8px_8px_0px_rgba(159,122,234,1)] mb-4">
-            CHOOSE YOUR EXPERIENCE
-          </h2>
-          <p className="sc-slogan text-sc-purple text-xl md:text-3xl">Physical products. Digital magic. Choose your path.</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          {/* Sticker Card */}
-          <Link href="/shop" className="block group sc-btn-push h-full">
-            <div className="sc-card !bg-sc-pink h-full transform transition-transform group-hover:scale-105 group-hover:rotate-1 flex flex-col">
-              <div className="bg-white border-4 border-black rounded-xl p-2 md:p-4 inline-block mb-4 md:mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] self-start">
-                <span className="font-heading text-sc-purple uppercase text-sm md:text-lg">Tier 01</span>
-              </div>
-              <h3 className="font-heading text-4xl sm:text-5xl md:text-6xl text-white [-webkit-text-stroke:2px_black] md:[-webkit-text-stroke:3px_black] drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] md:drop-shadow-[6px_6px_0px_rgba(0,0,0,1)] mb-2 md:mb-4">
-                AR STICKER
-              </h3>
-              <p className="font-sans font-bold text-black mb-6 md:mb-8 border-b-4 border-black pb-6 md:pb-8 text-base md:text-lg flex-grow">
-                Die-cut holographic stickers. Point your camera and watch 3D art come to life.
-              </p>
-              <div className="flex justify-between items-end mt-auto">
-                <div className="font-heading text-4xl md:text-6xl text-white drop-shadow-[3px_3px_0px_rgba(0,0,0,1)] md:drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                  ₹299
-                </div>
-                <div className="bg-white text-black font-heading text-lg md:text-xl px-6 py-2 md:px-8 md:py-3 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group-hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-                  GET IT ↗
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Keychain Card */}
-          <Link href="/shop" className="block group sc-btn-push h-full">
-            <div className="sc-card !bg-sc-cyan h-full transform transition-transform group-hover:scale-105 group-hover:-rotate-1 flex flex-col">
-              <div className="bg-white border-4 border-black rounded-xl p-2 md:p-4 inline-block mb-4 md:mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] self-start relative">
-                <span className="font-heading text-sc-purple uppercase text-sm md:text-lg">Tier 02</span>
-                <span className="absolute -top-4 -right-4 md:-top-6 md:-right-6 bg-sc-yellow text-black font-heading text-xs md:text-lg px-2 py-1 md:px-4 md:py-2 border-4 border-black rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transform rotate-12 animate-pulse">
-                  HOT!
-                </span>
-              </div>
-              <h3 className="font-heading text-4xl sm:text-5xl md:text-6xl text-white [-webkit-text-stroke:2px_black] md:[-webkit-text-stroke:3px_black] drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] md:drop-shadow-[6px_6px_0px_rgba(0,0,0,1)] mb-2 md:mb-4">
-                AR KEYCHAIN
-              </h3>
-              <p className="font-sans font-bold text-black mb-6 md:mb-8 border-b-4 border-black pb-6 md:pb-8 text-base md:text-lg flex-grow">
-                Premium acrylic keychains. Upload your photo + message. See them float in your room in 3D.
-              </p>
-              <div className="flex justify-between items-end mt-auto">
-                <div className="font-heading text-4xl md:text-6xl text-white drop-shadow-[3px_3px_0px_rgba(0,0,0,1)] md:drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                  ₹499
-                </div>
-                <div className="bg-white text-black font-heading text-lg md:text-xl px-6 py-2 md:px-8 md:py-3 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group-hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-                  GET IT ↗
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
-      </section>
+      
 
       {/* ── How It Works ─────────────────────────────────────────────────────── */}
-      <section id="how" className="py-20 md:py-32 border-y-4 md:border-y-8 border-black bg-white overflow-hidden relative shadow-[0px_8px_0px_0px_rgba(0,0,0,1)]">
+      <section id="how" className="py-20 md:py-32 border-y-4 md:border-y-8 border-black overflow-hidden relative shadow-[0px_8px_0px_0px_rgba(0,0,0,1)]">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6">
           <h2 className="font-heading text-4xl sm:text-5xl md:text-7xl text-center text-sc-purple mb-16 md:mb-24 drop-shadow-[4px_4px_0px_rgba(0,0,0,0.3)] md:drop-shadow-[6px_6px_0px_rgba(0,0,0,0.3)] [-webkit-text-stroke:1px_black] md:[-webkit-text-stroke:2px_black]">
             HOW IT WORKS
@@ -255,79 +195,6 @@ export default function LandingPage() {
                 </p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── AR Experience visual ──────────────────────────────────────────────── */}
-      <section className="py-20 md:py-32 px-4 md:px-12 max-w-[1200px] mx-auto relative">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-center">
-          
-          {/* Simulated AR Camera View */}
-          <div className="relative aspect-[3/4] md:aspect-square bg-gray-200 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] md:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] border-4 md:border-8 border-black group sc-btn-push order-2 lg:order-1 w-full max-w-md mx-auto lg:max-w-none">
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400">
-            <div className="ar-funky-frame border-[8px] md:border-[12px] z-50"></div>
-              <div className="w-full h-full opacity-30 bg-[radial-gradient(circle,rgba(0,0,0,1)_2px,transparent_2px)] bg-[size:16px_16px] md:bg-[size:24px_24px]"></div>
-            </div>
-            
-
-            {/* Simulated 3D Element */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 sc-blob bg-sc-pink w-[60%] h-[60%] animate-funky border-4 md:border-8 border-black flex items-center justify-center shadow-[8px_8px_0px_0px_rgba(0,0,0,0.7)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,0.7)]">
-               <span className="font-heading text-3xl md:text-5xl text-white drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] md:drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-12 [-webkit-text-stroke:1px_black] md:[-webkit-text-stroke:2px_black]">★ AR ★</span>
-            </div>
-
-            <div className="absolute bottom-8 md:bottom-12 left-1/2 transform -translate-x-1/2 w-[80%] md:w-auto text-center">
-               <div className="ar-status-pill animate-bounce text-sm md:text-xl inline-block px-4 py-1 md:px-6 md:py-2">
-                 ✓ Ready
-               </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-8 md:gap-10 order-1 lg:order-2 text-center lg:text-left">
-            <div>
-              <h2 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-black drop-shadow-[4px_4px_0px_rgba(34,211,238,1)] md:drop-shadow-[6px_6px_0px_rgba(34,211,238,1)] mb-4 md:mb-6 leading-tight lg:leading-none">
-                POWERED BY TECH
-              </h2>
-              <p className="sc-slogan text-sc-purple text-xl md:text-3xl">High performance. No downloads.</p>
-            </div>
-
-            <div className="space-y-4 md:space-y-6 text-left">
-              {[
-                { title: "Three.js", desc: "Real-time 3D rendering. Works on all phones." },
-                { title: "MindAR", desc: "Image-based tracking. Instant AR response." },
-                { title: "60 FPS", desc: "Optimized for mid-range and flagship phones." },
-              ].map((item, i) => (
-                <div key={i} className="sc-card !p-4 md:!p-6 sc-btn-push flex flex-col justify-center transition-all hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                  <h4 className="font-heading text-xl md:text-2xl text-sc-purple mb-1 md:mb-2 [-webkit-text-stroke:1px_black]">{item.title}</h4>
-                  <p className="font-sans font-bold text-gray-800 text-base md:text-lg">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Drop CTA ─────────────────────────────────────────────────────────── */}
-      <section className="bg-sc-purple py-24 md:py-40 px-4 md:px-6 border-y-4 md:border-y-8 border-black text-center relative overflow-hidden shadow-[0px_12px_0px_0px_rgba(0,0,0,1)]">
-        <div className="absolute top-4 left-4 md:top-10 md:left-10 sc-blob w-20 h-20 md:w-40 md:h-40 bg-sc-yellow border-4 md:border-8 border-black animate-funky shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"></div>
-        <div className="absolute bottom-4 right-4 md:bottom-10 md:right-10 sc-blob w-24 h-24 md:w-56 md:h-56 bg-sc-cyan border-4 md:border-8 border-black animate-funky shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" style={{animationDelay: '2s'}}></div>
-
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <h2 className="font-heading text-[clamp(40px,10vw,120px)] leading-none text-white [-webkit-text-stroke:2px_black] md:[-webkit-text-stroke:4px_black] drop-shadow-[8px_8px_0px_rgba(0,0,0,1)] md:drop-shadow-[12px_12px_0px_rgba(0,0,0,1)] mb-8 md:mb-12 transform -rotate-3">
-            LIMITED EDITION
-          </h2>
-          
-          <p className="font-heading text-lg sm:text-2xl md:text-3xl text-white mb-10 md:mb-16 bg-black p-4 md:p-6 rounded-xl md:rounded-2xl border-2 md:border-4 border-white inline-block transform rotate-2 shadow-[6px_6px_0px_0px_rgba(255,255,255,1)] md:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)]">
-            500 units worldwide · Claim yours today
-          </p>
-
-          <div>
-            <Link
-              href="/shop"
-              className="bg-sc-yellow border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-2xl px-8 py-4 md:px-16 md:py-6 sc-btn-push inline-block font-heading text-2xl sm:text-3xl md:text-4xl text-black uppercase w-[90%] sm:w-auto text-center transition-all active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-            >
-              SHOP NOW
-            </Link>
           </div>
         </div>
       </section>
