@@ -129,7 +129,7 @@ export default function CheckoutPage() {
   const labelClass = "block font-sans font-bold text-sm uppercase tracking-wider mb-2 text-black";
 
   return (
-    <div className="min-h-screen w-full relative pb-32 overflow-hidden selection:bg-sc-yellow selection:text-black">
+    <div className="bg-white min-h-screen w-full relative pb-32 overflow-hidden selection:bg-sc-yellow selection:text-black">
       
       {/* Nav */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-4 py-4 md:px-8 bg-white border-b-4 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">

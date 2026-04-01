@@ -93,7 +93,7 @@
 
   /* 5. Slogan Style */
   .sc-slogan {
-    @apply font-handwritten text-2xl text-sc-purple-dark lowercase italic;
+    @apply font-handwritten text-sc-purple-dark lowercase italic;
   }
 
   /* Scrollbar Customization */

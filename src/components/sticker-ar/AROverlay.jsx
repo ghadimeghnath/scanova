@@ -75,7 +75,7 @@ function StartButton({ onStart }) {
           Ready?
         </h1>
         <p className="font-sans font-bold text-base text-foreground/80 leading-relaxed mb-6">
-          Point your camera at your sticker to reveal the 3D art!
+          Point your camera at the design to reveal the Ar!
         </p>
         
         <button

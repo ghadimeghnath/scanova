@@ -1,4 +1,5 @@
-import "./globals.css";
+import Footer from "@/components/scanova/Footer";
+import "../globals.css";
 
 export const metadata = {
   title: "AR Keychain",
@@ -12,11 +13,12 @@ export const viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({ children }) {
+export default function ScanovaLayout({ children }) {
   return (
     <html lang="en">
       <body className="antialiased bg-[#080808]">
         {children}
+        <Footer />
       </body>
     </html>
   );
