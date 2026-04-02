@@ -129,7 +129,7 @@ export default function CheckoutPage() {
   const labelClass = "block font-sans font-bold text-sm uppercase tracking-wider mb-2 text-black";
 
   return (
-    <div className="bg-white min-h-screen w-full relative pb-32 overflow-hidden selection:bg-sc-yellow selection:text-black">
+    <div className="bg-white min-h-screen w-full relative pb-10 overflow-hidden selection:bg-sc-yellow selection:text-black">
       
       {/* Nav */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-4 py-4 md:px-8 bg-white border-b-4 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
@@ -148,9 +148,9 @@ export default function CheckoutPage() {
 
         {/* Form */}
         <div>
-          <h1 className="font-heading text-5xl md:text-7xl text-black mb-10 uppercase leading-none drop-shadow-[4px_4px_0px_rgba(34,211,238,1)]">
+          <h1 className="font-heading text-5xl md:text-7xl text-sc-yellow mb-10 uppercase leading-none drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
             Complete <br />
-            <span className="text-sc-purple drop-shadow-[4px_4px_0px_rgba(253,224,71,1)]">Your Order.</span>
+            <span className="text-sc-purple ">Your Order.</span>
           </h1>
 
           {errors.submit && (
@@ -164,7 +164,7 @@ export default function CheckoutPage() {
             <div className="inline-block bg-sc-yellow border-4 border-black px-4 py-1 rounded-full mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transform -rotate-2">
               <h2 className="font-heading text-xl text-black uppercase">Contact Info</h2>
             </div>
-            <div className="grid gap-6">
+            <div className="grid gap-4">
               <div>
                 <label className={labelClass}>Full Name</label>
                 <input className={getInputClass("customerName")} value={form.customerName} onChange={(e) => setField("customerName", e.target.value)} placeholder="Your full name" />
@@ -223,8 +223,8 @@ export default function CheckoutPage() {
 
           {/* Payment */}
           <section className="mb-12">
-            <div className="inline-block bg-sc-pink border-4 border-black px-4 py-1 rounded-full mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transform -rotate-1">
-              <h2 className="font-heading text-xl text-white uppercase">Payment Method</h2>
+            <div className="inline-block bg-sc-purple border-4 border-black px-4 py-1 rounded-full mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transform -rotate-1">
+              <h2 className="font-heading text-xl text-white uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">Payment Method</h2>
             </div>
             <div className="flex flex-col gap-4">
               {[
@@ -258,7 +258,7 @@ export default function CheckoutPage() {
           </section>
 
           {/* Notes */}
-          <section className="mb-12">
+          <section className="mb-8">
             <label className={labelClass}>Order Notes (Optional)</label>
             <textarea 
               value={form.notes} 
@@ -309,7 +309,7 @@ export default function CheckoutPage() {
               
               <div className="flex justify-between items-center mb-4 font-sans font-bold text-sm">
                 <span className="text-gray-600">Shipping</span>
-                <span className={shipping === 0 ? "text-sc-pink font-heading text-lg uppercase" : "text-gray-600"}>
+                <span className={shipping === 0 ? "text-sc-purple font-heading text-lg uppercase" : "text-gray-600"}>
                   {shipping === 0 ? "Free" : formatPrice(shipping)}
                 </span>
               </div>
@@ -322,7 +322,7 @@ export default function CheckoutPage() {
 
               <div className="flex justify-between items-center pt-4 border-t-4 border-black mt-4">
                 <span className="font-heading text-2xl text-black uppercase">Total</span>
-                <span className="font-heading text-3xl text-black drop-shadow-[2px_2px_0px_rgba(244,114,182,1)]">
+                <span className="font-heading text-3xl text-black ">
                   {formatPrice(total)}
                 </span>
               </div>
