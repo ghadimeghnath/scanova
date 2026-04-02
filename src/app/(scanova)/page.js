@@ -34,7 +34,7 @@ export default function LandingPage() {
         <div className="flex items-center justify-between py-3 px-4 md:py-4 md:px-12">
           <Link
             href="/"
-            className="font-heading text-2xl sm:text-3xl md:text-4xl text-sc-purple tracking-wid no-underline drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] sc-btn-push inline-block"
+            className="font-heading text-2xl sm:text-3xl md:text-4xl text-sc-purple tracking-widest no-underline drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] sc-btn-push inline-block"
           >
             SCANOVA
           </Link>
@@ -49,11 +49,11 @@ export default function LandingPage() {
                 {link.label}
               </Link>
             ))}
-            
+
             {/* Mobile Menu Toggle Button */}
-            <button 
+            <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="sm:hidden font-heading text-lg border-4 border-black rounded-full w-10 h-10 flex items-center justify-center bg-sc-yellow shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-black transition-all active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px]"
+              className="sm:hidden font-heading text-lg border-4 border-black rounded-full w-10 h-10 flex items-center justify-center bg-sc-yellow shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-black sc-btn-push"
             >
               {isMobileMenuOpen ? "✕" : "≡"}
             </button>
@@ -68,12 +68,11 @@ export default function LandingPage() {
                 key={`mobile-${link.href}`}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="font-sans font-bold text-black border-4 border-black rounded-xl px-4 py-3 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-sc-yellow active:bg-sc-yellow transition-colors text-center"
+                className="font-sans font-bold text-black border-4 border-black rounded-xl px-4 py-3 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sc-btn-push hover:bg-sc-yellow active:bg-sc-yellow transition-colors text-center"
               >
                 {link.label}
               </Link>
             ))}
-
           </div>
         )}
       </nav>
@@ -100,11 +99,7 @@ export default function LandingPage() {
 
         {mounted && (
           <div className="relative z-10 flex flex-col items-center animate-in fade-in zoom-in duration-500 w-full">
-            <div className="bg-sc-yellow border-4 border-black rounded-full px-4 py-2 md:px-8 md:py-3 mb-6 md:mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transform -rotate-2">
-              <span className="font-heading text-black tracking-widest uppercase text-xs sm:text-sm md:text-lg">
-                Drop 001 · The Funky Edition
-              </span>
-            </div>
+          
 
             <h1 className="font-heading text-[clamp(40px,10vw,160px)] leading-[0.9] md:leading-[0.85] text-white [-webkit-text-stroke:2px_black] md:[-webkit-text-stroke:4px_black] drop-shadow-[8px_8px_0px_rgba(0,0,0,1)] md:drop-shadow-[12px_12px_0px_rgba(0,0,0,1)] mb-4 md:mb-6">
               HOLD <br />
@@ -118,17 +113,19 @@ export default function LandingPage() {
             <div className="flex gap-4 md:gap-6 flex-col sm:flex-row w-full sm:w-auto px-4 sm:px-0">
               <Link
                 href="/shop"
-                className="bg-sc-yellow border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] rounded-2xl px-6 py-3 md:px-10 md:py-4 sc-btn-push font-heading text-lg md:text-2xl uppercase text-black w-full sm:w-auto text-center transition-all active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                className="bg-sc-yellow border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] rounded-2xl px-6 py-3 md:px-10 md:py-4 sc-btn-push font-heading text-lg md:text-2xl tracking-wide uppercase text-black w-full sm:w-auto text-center"
               >
                 Shop Now ↗
               </Link>
               <Link
                 href="/scanner"
-                className="bg-sc-purple border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] rounded-2xl px-6 py-3 md:px-10 md:py-4 sc-btn-push text-white font-heading text-lg md:text-2xl uppercase w-full sm:w-auto text-center transition-all active:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]"
+                className="bg-sc-purple border-4 border-black  shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] rounded-2xl px-6 py-3 md:px-10 md:py-4 sc-btn-push text-white font-heading text-lg md:text-2xl tracking-wide uppercase w-full sm:w-auto text-center"
               >
+                <span className="drop-shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+
                 Scan AR ★
+                </span>
               </Link>
-            
             </div>
           </div>
         )}
@@ -141,7 +138,6 @@ export default function LandingPage() {
             <div key={i} className="flex items-center">
               {[
                 "AR Keychains",
-                "AR Stickers",
                 "Image Tracking",
                 "Scan & Reveal",
                 "No App Required",
@@ -168,7 +164,6 @@ export default function LandingPage() {
       </div>
 
       {/* ── Products ─────────────────────────────────────────────────────────── */}
-      
 
       {/* ── How It Works ─────────────────────────────────────────────────────── */}
       <section id="how" className="py-20 md:py-32 border-y-4 md:border-y-8 border-black overflow-hidden relative shadow-[0px_8px_0px_0px_rgba(0,0,0,1)]">
@@ -180,10 +175,10 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 sm:gap-16 md:gap-12 relative z-10">
             {[
               { num: "1", title: "UNBOX", desc: "Get your AR-enabled merch & QR code.", color: "!bg-sc-yellow", rotation: "sm:-rotate-3" },
-              { num: "2", title: "SCAN", desc: "Point your camera. No app downloads.", color: "!bg-sc-pink", rotation: "sm:rotate-3" },
+              { num: "2", title: "SCAN", desc: "Point your camera. No app downloads.", color: "!bg-sc-purple", rotation: "sm:rotate-3" },
               { num: "3", title: "EXPERIENCE", desc: "See 3D art appear instantly.", color: "!bg-sc-cyan", rotation: "sm:-rotate-1" },
             ].map((step, i) => (
-              <div key={i} className={`sc-card ${step.color} transform ${step.rotation} flex flex-col items-center text-center sc-btn-push mt-6 md:mt-0 transition-all hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]`}>
+              <div key={i} className={`sc-card !pt-0 ${step.color} transform ${step.rotation} flex flex-col items-center text-center sc-btn-push mt-6 md:mt-0`}>
                 <div className="bg-white border-4 border-black w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center font-heading text-4xl md:text-5xl text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-6 md:mb-8 -mt-12 md:-mt-16">
                   {step.num}
                 </div>

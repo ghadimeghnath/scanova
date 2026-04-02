@@ -279,7 +279,7 @@ export default function ScannerPage() {
               Scanova
             </h2>
 
-            <div className="relative w-72 h-72 border-8 border-sc-yellow rounded-3xl overflow-hidden shadow-[8px_8px_0px_0px_var(--color-sc-pink)] box-content">
+            <div className="relative w-72 h-72 border-8 border-sc-yellow rounded-3xl overflow-hidden shadow-[8px_8px_0px_0px_var(--color-sc-purple-dark)] box-content">
               {/* Animated scanning bar */}
               <div className="absolute inset-x-0 top-0 h-4 bg-sc-cyan border-y-2 border-black animate-[scan-move_2s_ease-in-out_infinite_alternate] shadow-[0_0_20px_var(--color-sc-cyan)]" />
             </div>
